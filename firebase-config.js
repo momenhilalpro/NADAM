@@ -11,7 +11,15 @@ export const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-// تهيئة التطبيق وتصدير الـ Auth والـ Provider
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const googleProvider = new GoogleAuthProvider();
+// تهيئة التطبيق فقط عند اكتمال إعداد Firebase لتجنب تعطيل واجهة المتجر عند نقص متغيرات البيئة.
+const missingFirebaseConfig = Object.values(firebaseConfig).some(value => !value);
+let auth = null;
+let googleProvider = null;
+
+if (!missingFirebaseConfig) {
+    const app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    googleProvider = new GoogleAuthProvider();
+}
+
+export { auth, googleProvider };

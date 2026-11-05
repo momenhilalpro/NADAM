@@ -5161,7 +5161,13 @@ function startSocialProofNotifications() {
     scheduleNext();
 }
 async function requestGeminiText(prompt) {
-   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    const configuredKey = document.querySelector('meta[name="gemini-api-key"]')?.content?.trim();
+    const apiKey = window.VITE_GEMINI_API_KEY || configuredKey;
+    if (!apiKey) {
+        const error = new Error('Gemini API key is not configured');
+        error.status = 503;
+        throw error;
+    }
     const models = ["gemini-3.5-flash-lite", "gemini-3.8-flash"];
     let apiError;
 
@@ -5287,10 +5293,10 @@ function escapeHtml(text) {
             .filter(([, value]) => !value)
             .map(([key]) => key);
         if (missingFirebaseConfig.length) {
-            throw new Error(
-                `Firebase configuration is incomplete. Missing values for: ${missingFirebaseConfig.join(', ')}`
+            console.warn(
+                `[Store] Firebase authentication is unavailable. Missing configuration: ${missingFirebaseConfig.join(', ')}`
             );
-        }
+        } else {
         // أضف البريد الإداري الموثوق إلى هذه القائمة قبل النشر؛ لا تُمنح الصلاحية افتراضياً.
         const PRIMARY_ADMIN_EMAIL = 'momenhilal6942@gmail.com';
         const ADMIN_EMAILS = [PRIMARY_ADMIN_EMAIL];
@@ -6075,12 +6081,16 @@ function escapeHtml(text) {
         window.sendPhoneVerificationCode = sendPhoneVerificationCode;
         window.verifyPhoneCode = verifyPhoneCode;
         window.signOutStoreUser = signOutStoreUser;
-        document.getElementById('authModal').addEventListener('click', event => {
-            if (event.target.id === 'authModal') closeAuthModal();
+        document.addEventListener('DOMContentLoaded', () => {
+            const authModal = document.getElementById('authModal');
+            authModal?.addEventListener('click', event => {
+                if (event.target === authModal) closeAuthModal();
+            });
+            document.addEventListener('keydown', event => {
+                if (event.key === 'Escape') closeAuthModal();
+            });
         });
-        document.addEventListener('keydown', event => {
-            if (event.key === 'Escape') closeAuthModal();
-        });
+        }
  </script>
 <script>
     window.addEventListener('load', () => {
