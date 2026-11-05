@@ -5168,27 +5168,60 @@ async function requestGeminiText(prompt) {
         error.status = 503;
         throw error;
     }
-    const models = ["gemini-3.5-flash-lite", "gemini-3.8-flash"];
+    const models = [
+        "gemini-3.8-flash",
+        "gemini-3.6-flash",
+        "gemini-3.5-flash-lite"
+    ];
     let apiError;
 
     for (const model of models) {
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-        const response = await fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-        });
-        const data = await response.json();
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 20_000);
+            let response;
+            let data;
 
-        if (response.ok) {
-            const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (text) return text;
-            throw new Error("Gemini returned no text");
+            try {
+                response = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
+                    signal: controller.signal
+                });
+                data = await response.json();
+            } finally {
+                clearTimeout(timeoutId);
+            }
+
+            if (response.ok) {
+                const text = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+                if (text) return text;
+                throw Object.assign(new Error("Gemini returned no text"), { status: 502, model });
+            }
+
+            apiError = Object.assign(
+                new Error(data?.error?.message || `Gemini API request failed (${response.status})`),
+                { status: response.status, model }
+            );
+
+            if (![429, 500, 502, 503, 504].includes(response.status)) {
+                throw apiError;
+            }
+
+            await new Promise(resolve => setTimeout(resolve, 350 + Math.floor(Math.random() * 350)));
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                apiError = Object.assign(new Error('Gemini request timed out'), { status: 504, model });
+                continue;
+            }
+            if ([429, 500, 502, 503, 504].includes(error.status)) {
+                apiError = error;
+                continue;
+            }
+            throw error;
         }
-
-        apiError = new Error(data?.error?.message || `Gemini API request failed (${response.status})`);
-        apiError.status = response.status;
-        if (![429, 500, 502, 503, 504].includes(response.status)) throw apiError;
     }
 
     throw apiError || new Error("Gemini API request failed");
@@ -5227,9 +5260,17 @@ async function sendChatMessage() {
         }
         appendSupportChatMessage('assistant', reply, { mode: requestMode });
     } catch (error) {
-        const reply = [429, 500, 502, 503, 504].includes(error.status)
-            ? 'الخدمة الذكية مزدحمة مؤقتاً. يمكنك التبديل إلى وضع الموظف الافتراضي أو المحاولة لاحقاً.'
-            : 'تعذر إرسال الاستفسار حالياً. حاول مرة أخرى أو استخدم وضع الموظف الافتراضي.';
+        const normalizedMessage = userMessage.toLowerCase();
+        let reply = '';
+        if ([429, 500, 502, 503, 504].includes(error.status)) {
+            reply = normalizedMessage.includes('شحن')
+                ? 'الخدمة الذكية مزدحمة حالياً. يمكنكم متابعة الطلب عبر صفحة تتبع الطلبات، وشحننا عادةً خلال 2–5 أيام عمل.'
+                : normalizedMessage.includes('إرجاع') || normalizedMessage.includes('استرجاع')
+                    ? 'الخدمة الذكية مزدحمة حالياً. لطلب الإرجاع، افتح صفحة حسابي واختر الطلب ثم قدم طلب الإرجاع.'
+                    : 'الخدمة الذكية مزدحمة مؤقتاً، لكن يمكنك تصفح الأقسام والمنتجات أو استخدام وضع الموظف الافتراضي للرد الفوري.';
+        } else {
+            reply = 'تعذر إرسال الاستفسار حالياً. حاول مرة أخرى أو استخدم وضع الموظف الافتراضي.';
+        }
         appendSupportChatMessage('assistant', reply, { mode: requestMode });
         if (requestMode === 'ai') console.error('Gemini chat request failed:', error);
     } finally {
