@@ -161,6 +161,245 @@
         .spin-wheel.is-spinning {
             transform: rotate(var(--wheel-rotation, 1440deg));
         }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: clip;
+        }
+
+        img,
+        video,
+        canvas,
+        svg {
+            max-width: 100%;
+        }
+
+        main,
+        header,
+        footer,
+        section,
+        article,
+        form,
+        aside {
+            min-width: 0;
+            max-width: 100%;
+        }
+
+        #productsGrid,
+        #homeFeaturedGrid,
+        #wishlistItemsGrid,
+        #recommendationsGrid {
+            width: 100%;
+            max-width: 100%;
+        }
+
+        #productsGrid > *,
+        #homeFeaturedGrid > *,
+        #wishlistItemsGrid > *,
+        #recommendationsGrid > * {
+            min-width: 0;
+            max-width: 100%;
+        }
+
+        #horizontalDealsLane > div {
+            flex: 0 0 clamp(150px, 46vw, 200px);
+            min-width: 0 !important;
+            max-width: 200px !important;
+        }
+
+        #aiChatWindow {
+            width: min(24rem, calc(100vw - 2rem)) !important;
+            max-height: calc(100dvh - 5rem);
+            height: min(420px, calc(100dvh - 5rem)) !important;
+        }
+
+        @media (max-width: 640px) {
+            main {
+                padding-inline: 0.75rem !important;
+            }
+
+            header > div:first-child {
+                flex-wrap: wrap;
+                padding-inline: 0.5rem;
+            }
+
+            header > div:first-child > div:first-child {
+                margin-inline-end: auto;
+            }
+
+            header > div:first-child > div:last-child {
+                width: 100%;
+                justify-content: flex-start;
+                gap: 0.35rem;
+                overflow-x: auto;
+                padding-block: 0.15rem;
+                scrollbar-width: none;
+            }
+
+            header > div:first-child > div:last-child::-webkit-scrollbar {
+                display: none;
+            }
+
+            #currencySelect {
+                max-width: 7.25rem;
+                padding-inline: 0.35rem;
+                font-size: 0.68rem;
+            }
+
+            #authOpenButton {
+                flex-shrink: 0;
+                padding-inline: 0.5rem;
+                font-size: 0.68rem;
+            }
+
+            #page-home,
+            #page-catalog,
+            #page-trash,
+            #page-wishlist,
+            #page-crm,
+            #page-orders,
+            #page-support {
+                width: 100%;
+            }
+
+            #page-home > div,
+            #page-catalog > div,
+            #page-trash > div,
+            #page-wishlist > div,
+            #page-crm > div,
+            #page-orders > div,
+            #page-support > div {
+                max-width: 100%;
+            }
+
+            .spin-wheel {
+                width: clamp(220px, 68vw, 256px) !important;
+                height: clamp(220px, 68vw, 256px) !important;
+                margin-inline: auto;
+            }
+
+            #cartDrawer > div.fixed {
+                width: min(92vw, 28rem) !important;
+                max-width: 92vw !important;
+            }
+
+            #toastContainer {
+                left: 0.5rem !important;
+                right: 0.5rem !important;
+                width: auto !important;
+                max-width: none !important;
+            }
+
+            #compareModal > div,
+            #productModal > div,
+            #checkoutModal > div,
+            #invoiceModal > div,
+            #authModal > div {
+                padding-inline: 0.75rem !important;
+            }
+
+            #compareModal .inline-block,
+            #productModal .inline-block,
+            #checkoutModal .inline-block,
+            #invoiceModal section,
+            #authModal > div {
+                width: 100% !important;
+                max-width: 100% !important;
+                padding: 1rem !important;
+            }
+
+            #cartItemsContainer {
+                padding-inline: 0.75rem !important;
+            }
+
+            #productQuizModal section,
+            #spinWheelModal section {
+                width: 100% !important;
+                max-width: 100% !important;
+                padding: 1rem !important;
+            }
+
+            #productQuizForm {
+                grid-template-columns: minmax(0, 1fr) !important;
+            }
+
+            #productQuizForm select,
+            #productQuizForm button,
+            #checkoutModal input,
+            #checkoutModal select,
+            #checkoutModal textarea,
+            #authModal input,
+            #authModal select,
+            #authModal button {
+                width: 100%;
+                max-width: 100%;
+            }
+
+            #checkoutModal form,
+            #authFormsPanel {
+                min-width: 0;
+            }
+
+            input,
+            select,
+            textarea,
+            button {
+                max-width: 100%;
+            }
+
+            #productsGrid + div {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            #productsGrid + div > button {
+                flex: 1 1 calc(50% - 0.25rem);
+                padding-inline: 0.5rem;
+            }
+
+            #paginationInfoText {
+                order: -1;
+                flex-basis: 100%;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 380px) {
+            main {
+                padding-inline: 0.5rem !important;
+            }
+
+            #currencySelect {
+                max-width: 6rem;
+            }
+
+            .hide-scroll-bar {
+                scroll-snap-type: x proximity;
+            }
+
+            #horizontalDealsLane > div {
+                scroll-snap-align: start;
+                flex-basis: clamp(140px, 58vw, 175px);
+            }
+
+            #aiChatWindow {
+                left: 0.5rem !important;
+                width: calc(100vw - 1rem) !important;
+                max-width: calc(100vw - 1rem) !important;
+            }
+
+            .fixed.bottom-4.left-4 {
+                left: 0.5rem !important;
+            }
+        }
     </style>
 </head>
 <body class="bg-amazon-lightBg text-gray-900 min-h-screen flex flex-col justify-between selection:bg-amazon-yellow selection:text-amazon-navy">
