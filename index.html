@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>متجر الندم | Al-Nadam Mega Enterprise Store </title>
+    <title>صقر العرب | متجر الإلكترونيات واللابتوبات</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts: Cairo -->
@@ -702,10 +702,15 @@
             </button>
 
             <!-- Brand Logo -->
-            <button type="button" class="group flex shrink-0 items-center gap-2 rounded-lg p-1 text-right" onclick="navigateTo('home')" aria-label="الانتقال إلى الرئيسية">
-                <span class="relative flex items-center gap-1.5 rounded-lg border border-amazon-orange/40 bg-amazon-orange px-2.5 py-1.5 text-xl font-black text-amazon-navy shadow-[0_0_18px_rgba(255,153,0,.22)] transition group-hover:shadow-[0_0_24px_rgba(255,153,0,.42)] md:text-2xl">
-                    <i class="fa-solid fa-microchip text-base md:text-xl" aria-hidden="true"></i>
-                    <span>الندم</span>
+            <button type="button" class="group flex shrink-0 items-center gap-2 rounded-lg p-1 text-right" onclick="navigateTo('home')" aria-label="الانتقال إلى الرئيسية - صقر العرب">
+                <span class="relative flex items-center gap-2 rounded-lg border border-amazon-orange/50 bg-gradient-to-l from-amazon-orange via-[#f6c453] to-amazon-yellow px-2 py-1.5 text-amazon-navy shadow-[0_0_18px_rgba(255,153,0,.25)] transition group-hover:shadow-[0_0_26px_rgba(255,153,0,.48)] sm:px-3">
+                    <span class="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-full border border-amazon-yellow/70 bg-amazon-navy shadow-[0_0_14px_rgba(255,189,0,.38)] sm:h-[48px] sm:w-[48px]">
+                        <img src="./falcon-logo.svg" alt="شعار صقر العرب" class="h-full w-full rounded-full object-contain p-[2px]" width="48" height="48" loading="eager">
+                    </span>
+                    <span class="min-w-0 text-right leading-none">
+                        <span class="block whitespace-nowrap text-base font-black tracking-normal sm:text-xl md:text-2xl">صقر العرب</span>
+                        <span class="hidden whitespace-nowrap text-[8px] font-black text-amazon-navy/70 sm:block md:text-[9px]">مملكة الإلكترونيات والتقنية</span>
+                    </span>
                 </span>
             </button>
 
@@ -872,7 +877,7 @@
                     <button type="button" data-mega-category="smart" class="mega-main-category flex min-h-12 w-full items-center gap-3 border-r-4 border-transparent px-4 text-right text-sm font-black text-amazon-navy transition hover:border-amazon-orange hover:bg-white" data-main-category="smart"><i class="fa-solid fa-house-signal w-5 text-amazon-orange"></i>الأجهزة الذكية</button>
                 </aside>
                 <section id="megaMenuContent" class="min-w-0 overflow-y-auto p-4 sm:p-6">
-                    <!-- Dynamic content -->
+                    <!--   hedeer Dynamic content -->
                 </section>
             </div>
         </div>
@@ -880,8 +885,11 @@
         <div id="mobileMenuOverlay" class="fixed inset-0 z-[74] hidden bg-black/60 backdrop-blur-sm lg:hidden" onclick="closeMobileMenu()"></div>
         <aside id="mobileMenuDrawer" class="fixed bottom-0 right-0 top-0 z-[75] hidden w-[min(86vw,22rem)] translate-x-full bg-[#101820] text-white shadow-2xl transition-transform duration-300 lg:hidden" aria-label="قائمة الأقسام الرئيسية">
             <div class="flex items-center justify-between border-b border-white/10 px-4 py-4">
-                <button type="button" onclick="navigateTo('home'); closeMobileMenu();" class="flex items-center gap-2 text-lg font-black text-amazon-yellow">
-                    <i class="fa-solid fa-microchip" aria-hidden="true"></i> متجر الندم
+                <button type="button" onclick="navigateTo('home'); closeMobileMenu();" class="flex items-center gap-2 text-right text-amazon-yellow">
+                    <span class="flex h-[48px] w-[48px] shrink-0 items-center justify-center rounded-full border border-amazon-yellow/70 bg-amazon-navy shadow-[0_0_14px_rgba(255,189,0,.38)]">
+                        <img src="./falcon-logo.svg" alt="شعار صقر العرب" class="h-full w-full rounded-full object-contain p-[2px]" width="48" height="48" loading="eager">
+                    </span>
+                    <span class="leading-tight"><span class="block text-lg font-black">صقر العرب</span><span class="block text-[9px] font-bold text-gray-300">مملكة الإلكترونيات والتقنية</span></span>
                 </button>
                 <button type="button" onclick="closeMobileMenu()" class="flex h-11 w-11 items-center justify-center rounded-full text-gray-300 hover:bg-white/10 hover:text-white" aria-label="إغلاق القائمة">
                     <i class="fa-solid fa-xmark text-xl" aria-hidden="true"></i>
