@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <!-- Font Awesome 6 Pro Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <script>
         // Authentication inline-action bridge for the period before the Firebase module finishes loading.
         window.openAuthModal = function openAuthModalFallback() {
@@ -305,10 +306,18 @@
             grid-template-columns: minmax(0, 2fr) repeat(2, minmax(0, 1fr));
             grid-template-rows: repeat(2, minmax(180px, 220px));
             gap: 12px;
+            grid-template-areas:
+                "gaming phones large"
+                "audio smarthome large";
         }
         .promo-card-large {
             grid-row: 1 / 3;
+            grid-area: large;
         }
+        .promo-card-gaming { grid-area: gaming; }
+        .promo-card-phone { grid-area: phones; }
+        .promo-card-audio { grid-area: audio; }
+        .promo-card-smarthome { grid-area: smarthome; }
         .promo-card {
             min-width: 0;
             cursor: pointer;
@@ -331,7 +340,7 @@
                 overflow: hidden;
             }
             .promo-grid {
-                grid-template-columns: repeat(4, min(78vw, 320px));
+                grid-template-columns: repeat(5, min(78vw, 320px));
                 grid-template-rows: minmax(270px, 320px);
                 grid-auto-flow: column;
                 overflow-x: auto;
@@ -340,6 +349,7 @@
                 -webkit-overflow-scrolling: touch;
                 padding-bottom: 10px;
                 scrollbar-width: none;
+                grid-template-areas: none;
             }
             .promo-grid::-webkit-scrollbar { display: none; }
             .promo-card,
@@ -680,6 +690,42 @@
                 left: 0.5rem !important;
             }
         }
+        /* شعار صقر العرب في شريط التنقل */
+.falcon-logo-image,
+.falcon-img-icon {
+  display: block;
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+  transition: filter 0.3s ease, transform 0.3s ease;
+}
+
+.falcon-logo-image:hover,
+.falcon-img-icon:hover {
+  filter: drop-shadow(0 0 5px rgba(255, 193, 7, 0.7));
+  transform: scale(1.05);
+}
+
+/* النص واسم البراند */
+.falcon-brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.brand-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.5px;
+}
+
+.brand-subtitle {
+  font-size: 0.75rem;
+  color: #ff9900;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
     </style>
 </head>
 <body class="bg-amazon-lightBg text-gray-900 min-h-screen flex flex-col justify-between selection:bg-amazon-yellow selection:text-amazon-navy">
@@ -704,11 +750,11 @@
             <!-- Brand Logo -->
             <button type="button" class="group flex shrink-0 items-center gap-2 rounded-lg p-1 text-right" onclick="navigateTo('home')" aria-label="الانتقال إلى الرئيسية - صقر العرب">
                 <span class="relative flex items-center gap-2 rounded-lg border border-amazon-orange/50 bg-gradient-to-l from-amazon-orange via-[#f6c453] to-amazon-yellow px-2 py-1.5 text-amazon-navy shadow-[0_0_18px_rgba(255,153,0,.25)] transition group-hover:shadow-[0_0_26px_rgba(255,153,0,.48)] sm:px-3">
-                    <span class="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-full border border-amazon-yellow/70 bg-amazon-navy shadow-[0_0_14px_rgba(255,189,0,.38)] sm:h-[48px] sm:w-[48px]">
-                        <img src="./falcon-logo.svg" alt="شعار صقر العرب" class="h-full w-full rounded-full object-contain p-[2px]" width="48" height="48" loading="eager">
+                    <span class="flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-full border border-amazon-yellow/70 bg-amazon-navy shadow-[0_0_14px_rgba(255,189,0,.38)]">
+                        <img src="./assets/images/falcon-logo.png" onerror="this.onerror=null;this.src='./public/falcon-logo.svg'" alt="شعار صقر العرب" class="falcon-logo-image" width="50" height="50" loading="eager">
                     </span>
                     <span class="min-w-0 text-right leading-none">
-                        <span class="block whitespace-nowrap text-base font-black tracking-normal sm:text-xl md:text-2xl">صقر العرب</span>
+                        <span class="block whitespace-nowrap text-base font-black tracking-normal text-amazon-navy sm:text-xl md:text-2xl">صقر العرب</span>
                         <span class="hidden whitespace-nowrap text-[8px] font-black text-amazon-navy/70 sm:block md:text-[9px]">مملكة الإلكترونيات والتقنية</span>
                     </span>
                 </span>
@@ -886,8 +932,8 @@
         <aside id="mobileMenuDrawer" class="fixed bottom-0 right-0 top-0 z-[75] hidden w-[min(86vw,22rem)] translate-x-full bg-[#101820] text-white shadow-2xl transition-transform duration-300 lg:hidden" aria-label="قائمة الأقسام الرئيسية">
             <div class="flex items-center justify-between border-b border-white/10 px-4 py-4">
                 <button type="button" onclick="navigateTo('home'); closeMobileMenu();" class="flex items-center gap-2 text-right text-amazon-yellow">
-                    <span class="flex h-[48px] w-[48px] shrink-0 items-center justify-center rounded-full border border-amazon-yellow/70 bg-amazon-navy shadow-[0_0_14px_rgba(255,189,0,.38)]">
-         <img src="https://i.pinimg.com/736x/97/04/95/97049575990f22ab9da396b2235be18e.jpg" alt="شعار صقر العرب" class="h-full w-full rounded-full object-contain p-[2px]" width="48" height="48" loading="eager">
+                    <span class="flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-full border border-amazon-yellow/70 bg-amazon-navy shadow-[0_0_14px_rgba(255,189,0,.38)]">
+                        <img src="./assets/images/falcon-logo.png" onerror="this.onerror=null;this.src='./public/falcon-logo.svg'" alt="شعار صقر العرب" class="falcon-img-icon" width="50" height="50" loading="eager">
                     </span>
                     <span class="leading-tight"><span class="block text-lg font-black">صقر العرب</span><span class="block text-[9px] font-bold text-gray-300">مملكة الإلكترونيات والتقنية</span></span>
                 </button>
@@ -976,48 +1022,51 @@
                         </div>
                     </article>
 
-                    <article class="promo-card group relative overflow-hidden rounded-lg bg-[#172033] text-white" onclick="setCategoryFilter('phones'); navigateTo('catalog')">
+                    <article class="promo-card promo-card-gaming group relative overflow-hidden rounded-lg bg-[#090b12] text-white" onclick="setCategoryFilter('gaming'); navigateTo('catalog')">
+                        <img src="https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=700&q=85" alt="عروض أجهزة القيمنق" class="promo-card-image absolute inset-0 h-full w-full object-cover opacity-55">
+                        <div class="absolute inset-0 bg-[linear-gradient(135deg,rgba(20,4,35,.95)_0%,rgba(94,15,125,.55)_48%,transparent_100%)]"></div>
+                        <div class="absolute -bottom-16 -left-10 h-32 w-32 rounded-full bg-fuchsia-500/30 blur-3xl"></div>
+                        <div class="relative z-10 flex h-full flex-col justify-end p-4 sm:p-5">
+                            <span class="mb-2 w-fit rounded-full border border-fuchsia-300/40 bg-fuchsia-500/20 px-2.5 py-1 text-[9px] font-black text-fuchsia-100 backdrop-blur-sm">عرض قيمنق</span>
+                            <h3 class="text-xl font-black sm:text-2xl">جاهز للعب؟</h3>
+                            <p class="mt-1 text-xs text-fuchsia-100">خصومات وملحقات بأسطوري</p>
+                            <button type="button" onclick="event.stopPropagation(); setCategoryFilter('gaming'); navigateTo('catalog')" class="mt-3 min-h-10 w-fit rounded-md border border-fuchsia-300/50 bg-fuchsia-500/90 px-3 text-xs font-black shadow-[0_0_18px_rgba(217,70,239,.35)] backdrop-blur-sm transition hover:bg-white hover:text-[#24102d]">اكتشف العروض</button>
+                        </div>
+                    </article>
+
+                    <article class="promo-card promo-card-phone group relative overflow-hidden rounded-lg bg-[#172033] text-white" onclick="setCategoryFilter('phones'); navigateTo('catalog')">
                         <img src="https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=700&q=85" alt="عروض الهواتف الذكية" class="promo-card-image absolute inset-0 h-full w-full object-cover opacity-60">
                         <div class="absolute inset-0 bg-gradient-to-t from-[#172033] via-[#172033]/35 to-transparent"></div>
                         <div class="relative z-10 flex h-full flex-col justify-end p-4 sm:p-5">
-                            <span class="mb-2 w-fit rounded-full bg-white/15 px-2.5 py-1 text-[9px] font-black backdrop-blur-sm">مدفوع مسبقاً</span>
+                            <span class="mb-2 w-fit rounded-full bg-amazon-yellow/90 px-2.5 py-1 text-[9px] font-black text-amazon-navy">خصم حصري</span>
                             <h3 class="text-xl font-black sm:text-2xl">الهواتف الذكية</h3>
                             <p class="mt-1 text-xs text-gray-200">خصومات تصل إلى 40%</p>
                             <button type="button" onclick="event.stopPropagation(); setCategoryFilter('phones'); navigateTo('catalog')" class="mt-3 min-h-10 w-fit rounded-md bg-white px-3 text-xs font-black text-amazon-navy hover:bg-amazon-orange">تسوق الآن</button>
                         </div>
                     </article>
 
-                    <article class="promo-card group relative overflow-hidden rounded-lg bg-[#5a170b] text-white" onclick="setCategoryFilter('gaming'); navigateTo('catalog')">
-                        <img src="https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=700&q=85" alt="عروض أجهزة القيمنق" class="promo-card-image absolute inset-0 h-full w-full object-cover opacity-65">
-                        <div class="absolute inset-0 bg-gradient-to-t from-[#3a0d06] via-transparent to-transparent"></div>
-                        <div class="relative z-10 flex h-full flex-col justify-end p-4 sm:p-5">
-                            <span class="mb-2 w-fit rounded-full bg-amazon-orange px-2.5 py-1 text-[9px] font-black text-amazon-navy">عرض قيمنق</span>
-                            <h3 class="text-xl font-black sm:text-2xl">جاهز للعب؟</h3>
-                            <p class="mt-1 text-xs text-orange-100">خصم إضافي على الملحقات</p>
-                            <button type="button" onclick="event.stopPropagation(); setCategoryFilter('gaming'); navigateTo('catalog')" class="mt-3 min-h-10 w-fit rounded-md border border-white/40 bg-white/10 px-3 text-xs font-black backdrop-blur-sm hover:bg-white hover:text-amazon-navy">اكتشف العروض</button>
-                        </div>
-                    </article>
-
-                    <article class="promo-card promo-card-small group relative overflow-hidden rounded-lg bg-[#0f766e] text-white" onclick="setCategoryFilter('audio'); navigateTo('catalog')">
+                    <article class="promo-card promo-card-audio promo-card-small group relative overflow-hidden rounded-lg bg-[#0f766e] text-white" onclick="setCategoryFilter('audio'); navigateTo('catalog')">
                         <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=85" alt="عروض السماعات والساعات" class="promo-card-image absolute inset-0 h-full w-full object-cover opacity-55">
                         <div class="absolute inset-0 bg-gradient-to-l from-[#0a4d48] to-transparent"></div>
                         <div class="relative z-10 flex h-full items-center p-4 sm:p-5">
                             <div class="max-w-[70%]">
                                 <span class="text-[9px] font-black text-yellow-300">هدية لكل طلب</span>
                                 <h3 class="mt-1 text-lg font-black sm:text-xl">صوت وساعات</h3>
-                                <button type="button" onclick="event.stopPropagation(); setCategoryFilter('audio'); navigateTo('catalog')" class="mt-2 text-xs font-black underline decoration-amazon-yellow decoration-2 underline-offset-4">تسوق الآن</button>
+                                <p class="mt-1 text-xs text-gray-100">صوت نقي وتجربة استماع مميزة</p>
+                                <button type="button" onclick="event.stopPropagation(); setCategoryFilter('audio'); navigateTo('catalog')" class="mt-3 min-h-9 w-fit rounded-md bg-amazon-yellow px-3 text-xs font-black text-amazon-navy transition hover:bg-white">تسوق الآن</button>
                             </div>
                         </div>
                     </article>
 
-                    <article class="promo-card promo-card-small group relative overflow-hidden rounded-lg bg-[#202b45] text-white" onclick="setCategoryFilter('smarthome'); navigateTo('catalog')">
+                    <article class="promo-card promo-card-smarthome promo-card-small group relative overflow-hidden rounded-lg bg-[#202b45] text-white" onclick="setCategoryFilter('smarthome'); navigateTo('catalog')">
                         <img src="https://images.unsplash.com/photo-1543512214-318c7553f230?w=600&q=85" alt="عروض المنزل الذكي" class="promo-card-image absolute inset-0 h-full w-full object-cover opacity-55">
                         <div class="absolute inset-0 bg-gradient-to-l from-[#202b45] to-transparent"></div>
                         <div class="relative z-10 flex h-full items-center p-4 sm:p-5">
                             <div class="max-w-[70%]">
                                 <span class="text-[9px] font-black text-amazon-yellow">تقنية المنزل الذكي</span>
                                 <h3 class="mt-1 text-lg font-black sm:text-xl">بيت أذكى</h3>
-                                <button type="button" onclick="event.stopPropagation(); setCategoryFilter('smarthome'); navigateTo('catalog')" class="mt-2 text-xs font-black underline decoration-amazon-yellow decoration-2 underline-offset-4">استكشف الآن</button>
+                                <p class="mt-1 text-xs text-gray-200">راحة وأمان بتقنيات متطورة</p>
+                                <button type="button" onclick="event.stopPropagation(); setCategoryFilter('smarthome'); navigateTo('catalog')" class="mt-3 min-h-9 w-fit rounded-md bg-white px-3 text-xs font-black text-amazon-navy transition hover:bg-amazon-orange">استكشف الآن</button>
                             </div>
                         </div>
                     </article>
@@ -1385,6 +1434,23 @@
                 </article>
             </div>
 
+            <div class="flex justify-end">
+                <button type="button" onclick="openAdminProductModal()" class="rounded-lg bg-amazon-orange px-4 py-2.5 text-sm font-black text-amazon-navy shadow hover:bg-amazon-orangeHover">
+                    <i class="fa-solid fa-plus ml-1"></i>إضافة منتج جديد
+                </button>
+            </div>
+
+            <section class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                <article class="rounded-lg border bg-white p-5 shadow-sm">
+                    <h2 class="mb-4 text-sm font-black text-amazon-navy">اتجاه الإيرادات الشهرية</h2>
+                    <div class="h-72"><canvas id="adminRevenueChart" aria-label="رسم الإيرادات الشهرية"></canvas></div>
+                </article>
+                <article class="rounded-lg border bg-white p-5 shadow-sm">
+                    <h2 class="mb-4 text-sm font-black text-amazon-navy">توزيع المنتجات حسب الأقسام</h2>
+                    <div class="h-72"><canvas id="adminCategoryChart" aria-label="رسم توزيع الأقسام"></canvas></div>
+                </article>
+            </section>
+
             <div class="grid grid-cols-1 gap-6 xl:grid-cols-3">
                 <form onsubmit="addAdminProduct(event)" class="space-y-4 rounded-lg border bg-white p-5 shadow-sm">
                     <h2 class="border-b pb-3 text-lg font-black text-amazon-navy"><i class="fa-solid fa-circle-plus ml-1 text-amazon-orange"></i>إضافة منتج</h2>
@@ -1417,6 +1483,9 @@
                             <input id="adminProductStock" type="number" min="0" max="1000000" step="1" required class="mt-1 w-full rounded border p-2">
                         </label>
                     </div>
+                    <label class="block text-xs font-bold">الخصم (%)
+                        <input id="adminProductDiscount" type="number" min="0" max="95" step="1" value="0" class="mt-1 w-full rounded border p-2">
+                    </label>
                     <label class="block text-xs font-bold">رابط الصورة (اختياري)
                         <input id="adminProductImage" type="url" maxlength="1000" class="mt-1 w-full rounded border p-2" placeholder="https://...">
                     </label>
@@ -1427,6 +1496,11 @@
                     <div class="flex flex-wrap items-center justify-between gap-3 border-b pb-3">
                         <h2 class="text-lg font-black text-amazon-navy"><i class="fa-solid fa-boxes-stacked ml-1 text-amazon-orange"></i>إدارة الكتالوج</h2>
                         <input id="adminProductSearch" type="search" oninput="renderAdminCatalog()" class="min-w-52 rounded border p-2 text-xs" placeholder="ابحث عن منتج أو قسم">
+                        <select id="adminProductStatusFilter" onchange="renderAdminCatalog()" class="rounded border p-2 text-xs font-bold" aria-label="تصفية حالة المخزون">
+                            <option value="all">كل المخزون</option>
+                            <option value="available">متوفر</option>
+                            <option value="out">نفد المخزون</option>
+                        </select>
                     </div>
                     <div class="max-h-[36rem] overflow-auto">
                         <table class="w-full min-w-[850px] text-right text-xs">
@@ -1474,6 +1548,15 @@
                     <h2 class="text-lg font-black text-amazon-navy"><i class="fa-solid fa-clipboard-list ml-1 text-amazon-orange"></i>الطلبات وإدارة حالتها</h2>
                     <p class="mt-1 text-xs text-gray-500">المبيعات تستثني الطلبات الملغاة وتُخصم منها المبالغ المستردة. قبول الإرجاع يسجل استرداداً تجريبياً ويعيد الكميات للمخزون.</p>
                 </div>
+                <div class="flex flex-wrap gap-3">
+                    <input id="adminOrderSearch" type="search" oninput="renderAdminOrders()" class="min-w-52 flex-1 rounded border p-2 text-xs" placeholder="ابحث برقم الطلب أو اسم العميل">
+                    <select id="adminOrderStatusFilter" onchange="renderAdminOrders()" class="rounded border p-2 text-xs font-bold">
+                        <option value="all">كل الحالات</option>
+                        <option value="processing">قيد المعالجة</option>
+                        <option value="completed">مكتمل</option>
+                        <option value="cancelled">ملغي</option>
+                    </select>
+                </div>
                 <div class="overflow-x-auto">
                     <table class="w-full min-w-[720px] text-right text-xs">
                         <thead class="bg-gray-100 text-gray-700">
@@ -1484,6 +1567,38 @@
                 </div>
             </section>
         </section>
+
+        <div id="adminProductModal" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/60 p-4" onclick="if (event.target === this) closeAdminProductModal()">
+            <form id="adminProductModalForm" onsubmit="addAdminProductFromModal(event)" class="w-full max-w-lg space-y-3 rounded-lg bg-white p-5 shadow-2xl">
+                <div class="flex items-center justify-between border-b pb-3">
+                    <h2 class="text-lg font-black text-amazon-navy">إضافة منتج جديد</h2>
+                    <button type="button" onclick="closeAdminProductModal()" class="h-10 w-10 rounded-full text-gray-500 hover:bg-gray-100" aria-label="إغلاق">×</button>
+                </div>
+                <label class="block text-xs font-bold">اسم المنتج
+                    <input id="modalProductTitle" required maxlength="140" class="mt-1 w-full rounded border p-2">
+                </label>
+                <div class="grid grid-cols-2 gap-3">
+                    <label class="block text-xs font-bold">السعر
+                        <input id="modalProductPrice" type="number" min="0.01" max="100000000" step="0.01" required class="mt-1 w-full rounded border p-2">
+                    </label>
+                    <label class="block text-xs font-bold">الخصم (%)
+                        <input id="modalProductDiscount" type="number" min="0" max="95" step="1" value="0" class="mt-1 w-full rounded border p-2">
+                    </label>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <label class="block text-xs font-bold">القسم
+                        <select id="modalProductCategory" required class="mt-1 w-full rounded border p-2"></select>
+                    </label>
+                    <label class="block text-xs font-bold">المخزون
+                        <input id="modalProductStock" type="number" min="0" max="1000000" step="1" required class="mt-1 w-full rounded border p-2">
+                    </label>
+                </div>
+                <label class="block text-xs font-bold">رابط الصورة
+                    <input id="modalProductImage" type="url" maxlength="1000" required class="mt-1 w-full rounded border p-2" placeholder="https://...">
+                </label>
+                <button type="submit" class="w-full rounded bg-amazon-navy px-4 py-3 font-black text-white hover:bg-amazon-lightNavy">حفظ في Firestore</button>
+            </form>
+        </div>
 
     </main>
 
@@ -4098,6 +4213,63 @@
             renderAdminOrders();
             renderAdminCategories();
             renderAdminUsers();
+            renderAdminCharts();
+        }
+
+        let adminRevenueChartInstance = null;
+        let adminCategoryChartInstance = null;
+
+        function renderAdminCharts() {
+            if (!window.Chart) return;
+            const allOrders = Object.values(usersById).flatMap(user =>
+                (Array.isArray(user.orders) ? user.orders : []).map(order => ({ ...order }))
+            );
+            const monthly = new Map();
+            allOrders.forEach(order => {
+                if (isOrderCancelled(order)) return;
+                const date = new Date(order.timestamp || order.date);
+                const key = Number.isNaN(date.getTime()) ? 'غير معروف' :
+                    `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                monthly.set(key, (monthly.get(key) || 0) + Math.max(0, Number(order.total || 0) - Number(order.refundAmount || 0)));
+            });
+            const monthKeys = [...monthly.keys()].sort().slice(-12);
+            const revenueLabels = monthKeys.map(key => key === 'غير معروف' ? key :
+                new Intl.DateTimeFormat('ar-EG', { month: 'short', year: 'numeric' }).format(new Date(`${key}-01T00:00:00`)));
+
+            if (adminRevenueChartInstance) adminRevenueChartInstance.destroy();
+            adminRevenueChartInstance = new Chart(document.getElementById('adminRevenueChart'), {
+                type: 'line',
+                data: {
+                    labels: revenueLabels,
+                    datasets: [{
+                        label: 'الإيرادات (ج.م)',
+                        data: monthKeys.map(key => monthly.get(key) || 0),
+                        borderColor: '#FF9900',
+                        backgroundColor: 'rgba(255,153,0,.15)',
+                        fill: true,
+                        tension: .35
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { rtl: true } } }
+            });
+
+            const categoryCounts = {};
+            productsData.forEach(product => {
+                categoryCounts[product.category] = (categoryCounts[product.category] || 0) + 1;
+            });
+            const categoryEntries = Object.entries(categoryCounts);
+            if (adminCategoryChartInstance) adminCategoryChartInstance.destroy();
+            adminCategoryChartInstance = new Chart(document.getElementById('adminCategoryChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: categoryEntries.map(([category]) => category),
+                    datasets: [{
+                        data: categoryEntries.map(([, count]) => count),
+                        backgroundColor: ['#FF9900','#131921','#007185','#CC0C39','#007600','#8B5CF6','#F59E0B','#64748B']
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { rtl: true, position: 'bottom' } } }
+            });
         }
 
         // احتساب المبيعات والعملاء والطلبات دون جمع الطلبات الملغاة ضمن المبيعات.
@@ -4136,9 +4308,14 @@
             const rows = document.getElementById('adminCatalogRows');
             if (!rows) return;
             const search = (document.getElementById('adminProductSearch')?.value || '').trim().toLocaleLowerCase();
-            const products = productsData.filter(product =>
-                `${product.name} ${product.brand} ${product.category}`.toLocaleLowerCase().includes(search)
-            );
+            const stockFilter = document.getElementById('adminProductStatusFilter')?.value || 'all';
+            const products = productsData.filter(product => {
+                const matchesSearch = `${product.name} ${product.brand || ''} ${product.category}`.toLocaleLowerCase().includes(search);
+                const matchesStock = stockFilter === 'all' ||
+                    (stockFilter === 'available' && Number(product.stock) > 0) ||
+                    (stockFilter === 'out' && Number(product.stock) === 0);
+                return matchesSearch && matchesStock;
+            });
             rows.innerHTML = products.map(product => `
                 <tr>
                     <td class="p-2"><span class="block max-w-64 truncate font-bold text-amazon-navy">${escapeHtml(product.name)}</span><span class="text-[10px] text-gray-500">${escapeHtml(product.category)}</span></td>
@@ -4194,10 +4371,12 @@
             const brand = document.getElementById('adminProductBrand').value.trim();
             const specs = document.getElementById('adminProductSpecs').value.trim();
             const price = Number(document.getElementById('adminProductPrice').value);
+            const discount = Number(document.getElementById('adminProductDiscount').value || 0);
             const stock = Number(document.getElementById('adminProductStock').value);
             const imageValue = document.getElementById('adminProductImage').value.trim();
             if (!name || name.length > 140 || !productCategories.includes(category) ||
                 !specs || specs.length > 500 || !Number.isFinite(price) || price <= 0 || price > 100000000 ||
+                !Number.isInteger(discount) || discount < 0 || discount > 95 ||
                 !Number.isInteger(stock) || stock < 0 || stock > 1000000) {
                 showToast('راجع اسم المنتج والقسم والمواصفات والسعر والمخزون.', 'error');
                 return;
@@ -4217,9 +4396,10 @@
                 image = productsData.find(product => product.category === category)?.img || productsData[0]?.img || '';
             }
 
+            const discountedPrice = Math.round(price * (1 - discount / 100) * 100) / 100;
             const newProduct = {
-                name, category, brand, price, oldPrice: price, rating: '0.0', reviews: 0,
-                stock, img: image, specs, score: 0, isDeal: false
+                name, category, brand, price: discountedPrice, oldPrice: price, discount, rating: '0.0', reviews: 0,
+                stock, img: image, specs, score: 0, isDeal: discount > 0
             };
             try {
                 await window.addFirestoreProduct(newProduct);
@@ -4442,20 +4622,98 @@
                 ).join('');
                 if (nextCategoryIds.includes(previousValue)) select.value = previousValue;
             }
+            const modalCategory = document.getElementById('modalProductCategory');
+            if (modalCategory) {
+                const previousValue = modalCategory.value;
+                modalCategory.innerHTML = categories.map(category =>
+                    `<option value="${escapeHtml(category.id)}">${escapeHtml(category.name)}</option>`
+                ).join('');
+                if (nextCategoryIds.includes(previousValue)) modalCategory.value = previousValue;
+            }
             renderAdminCategories();
         }
 
         // تحديث قائمة حسابات Firestore الحية ومؤشرات المستخدمين في لوحة الإدارة.
         function applyFirestoreUsers(users) {
             firestoreUsers = Array.isArray(users) ? users : [];
+            firestoreUsers.forEach(firestoreUser => {
+                const userId = firestoreUser.uid;
+                if (!userId) return;
+                usersById[userId] = {
+                    ...usersById[userId],
+                    ...firestoreUser,
+                    id: userId,
+                    name: firestoreUser.displayName || firestoreUser.name || usersById[userId]?.name || '',
+                    orders: Array.isArray(firestoreUser.orders) ? firestoreUser.orders : (usersById[userId]?.orders || [])
+                };
+            });
             renderAdminUsers();
             renderAdminMetrics();
+            renderAdminOrders();
+            renderAdminCharts();
         }
 
         window.addEventListener('alnadam:firestore-products', event => applyFirestoreProducts(event.detail));
         window.addEventListener('alnadam:firestore-categories', event => applyFirestoreCategories(event.detail));
         window.addEventListener('alnadam:firestore-users', event => applyFirestoreUsers(event.detail));
         window.getStoreCatalogForFirestore = () => productsData.map(product => ({ ...product }));
+
+        function openAdminProductModal() {
+            if (!isStoreAdmin()) return showToast('تتطلب هذه العملية حساب مدير معتمد.', 'error');
+            const modal = document.getElementById('adminProductModal');
+            const categorySelect = document.getElementById('modalProductCategory');
+            if (categorySelect && !categorySelect.options.length) {
+                categorySelect.innerHTML = firestoreCategories.map(category =>
+                    `<option value="${escapeHtml(category.id)}">${escapeHtml(category.name)}</option>`
+                ).join('');
+            }
+            modal?.classList.remove('hidden');
+            modal?.classList.add('flex');
+            document.getElementById('modalProductTitle')?.focus();
+        }
+
+        function closeAdminProductModal() {
+            document.getElementById('adminProductModal')?.classList.add('hidden');
+            document.getElementById('adminProductModal')?.classList.remove('flex');
+        }
+
+        async function addAdminProductFromModal(event) {
+            event.preventDefault();
+            const title = document.getElementById('modalProductTitle').value.trim();
+            const price = Number(document.getElementById('modalProductPrice').value);
+            const discount = Number(document.getElementById('modalProductDiscount').value || 0);
+            const category = document.getElementById('modalProductCategory').value;
+            const stock = Number(document.getElementById('modalProductStock').value);
+            const image = document.getElementById('modalProductImage').value.trim();
+            if (!title || !Number.isFinite(price) || price <= 0 || !Number.isInteger(discount) || discount < 0 || discount > 95 ||
+                !Number.isInteger(stock) || stock < 0 || !isSafeProductImageUrl(image)) {
+                showToast('راجع بيانات المنتج والسعر والخصم والمخزون ورابط الصورة.', 'error');
+                return;
+            }
+            const discountedPrice = Math.round(price * (1 - discount / 100) * 100) / 100;
+            try {
+                await window.addFirestoreProduct({
+                    name: title,
+                    category,
+                    brand: '',
+                    price: discountedPrice,
+                    oldPrice: price,
+                    discount,
+                    rating: '0.0',
+                    reviews: 0,
+                    stock,
+                    img: image,
+                    specs: title,
+                    score: 0,
+                    isDeal: discount > 0
+                });
+                event.target.reset();
+                closeAdminProductModal();
+                showToast('تمت إضافة المنتج إلى Firestore.');
+            } catch (error) {
+                showToast(error.message || 'تعذرت إضافة المنتج.', 'error');
+            }
+        }
 
         // عرض الطلبات لكل العملاء وتوفير تحديث تجريبي لحالة كل طلب.
         function renderAdminOrders() {
@@ -4471,11 +4729,19 @@
             ).sort((first, second) =>
                 new Date(second.timestamp || second.date).getTime() - new Date(first.timestamp || first.date).getTime()
             );
-            if (!allOrders.length) {
+            const search = (document.getElementById('adminOrderSearch')?.value || '').trim().toLocaleLowerCase();
+            const statusFilter = document.getElementById('adminOrderStatusFilter')?.value || 'all';
+            const filteredOrders = allOrders.filter(order => {
+                const status = isOrderCompleted(order) ? 'completed' : isOrderCancelled(order) ? 'cancelled' : 'processing';
+                const matchesStatus = statusFilter === 'all' || status === statusFilter;
+                const matchesSearch = `${order.id || ''} ${order.customerName || ''}`.toLocaleLowerCase().includes(search);
+                return matchesStatus && matchesSearch;
+            });
+            if (!filteredOrders.length) {
                 rows.innerHTML = '<tr><td colspan="6" class="p-5 text-center text-gray-500">لا توجد طلبات محفوظة حالياً.</td></tr>';
                 return;
             }
-            rows.innerHTML = allOrders.map(order => {
+            rows.innerHTML = filteredOrders.map(order => {
                 const status = isOrderCompleted(order) ? 'completed' :
                     isOrderCancelled(order) ? 'cancelled' : 'processing';
                 return `<tr>
@@ -4497,7 +4763,7 @@
         }
 
         // تحديث حالة الطلب في ملف العميل نفسه ثم إعادة احتساب مؤشرات لوحة الإدارة.
-        function updateAdminOrderStatus(userId, orderId, status) {
+        async function updateAdminOrderStatus(userId, orderId, status) {
             if (!isStoreAdmin()) {
                 showToast('غير مصرح لك بتحديث الطلبات.', 'error');
                 return;
@@ -4509,6 +4775,9 @@
                 return;
             }
             try {
+                if (typeof window.updateFirestoreOrderStatus === 'function') {
+                    await window.updateFirestoreOrderStatus(userId, orderId, statusLabels[status], status);
+                }
                 const savedData = JSON.parse(localStorage.getItem(loyaltyStorageKey) || '{}');
                 const savedUsers = savedData.users || usersById;
                 const profile = savedUsers[userId];
@@ -5352,13 +5621,17 @@
                     return;
                 }
 
+                window.syncFirestoreUserOrders?.(activeUserId, nextPersistedOrders).catch(error =>
+                    console.error('Firestore order synchronization failed:', error)
+                );
+
                 const itemsText = cart.map((item, index) =>
                     `${index + 1}. ${item.name} | الكمية: ${item.qty} | السعر: ${formatMoney(getEffectiveProductPrice(item.id) * item.qty)}`
                 ).join('\n');
                 const installmentText = selectedPayment === 'tabby'
                     ? `\n*الأقساط التقديرية (4 دفعات):* ${calculateInstallmentAmounts(finalTotal).map(formatMoney).join('، ')}`
                     : '';
-                const message = `طلب جديد من متجر الندم (200 Mega Store) 🛒:\n\n*اسم العميل:* ${name}\n*رقم الواتساب:* ${phone}\n*عنوان التوصيل:* ${address}\n\n*وسيلة الدفع المختارة:* ${paymentTitle}${installmentText}\n*شركة الشحن:* ${shippingCompany}\n*تكلفة الشحن:* ${selectedShippingCost === 0 ? 'مجاني' : formatMoney(selectedShippingCost)}\n*كوبون الخصم:* ${appliedCouponCode || 'لا يوجد'} (${hasFreeShippingCoupon() ? 'شحن مجاني' : formatMoney(couponDiscount)})\n*خصم نقاط الولاء:* ${formatMoney(discount)} (${redeemedPoints.toLocaleString()} نقطة)\n\n*قائمة المنتجات المطلوبة:*\n${itemsText}\n\n*إجمالي المبلغ النهائي:* ${formatMoney(finalTotal)}\n*النقاط المكتسبة من الطلب:* ${pointsEarned.toLocaleString()} نقطة\n\nيرجى تأكيد الطلب وتحديد طريقة التحويل!`;
+                const message = `طلب جديد من متجر صقر العرب  🛒:\n\n*اسم العميل:* ${name}\n*رقم الواتساب:* ${phone}\n*عنوان التوصيل:* ${address}\n\n*وسيلة الدفع المختارة:* ${paymentTitle}${installmentText}\n*شركة الشحن:* ${shippingCompany}\n*تكلفة الشحن:* ${selectedShippingCost === 0 ? 'مجاني' : formatMoney(selectedShippingCost)}\n*كوبون الخصم:* ${appliedCouponCode || 'لا يوجد'} (${hasFreeShippingCoupon() ? 'شحن مجاني' : formatMoney(couponDiscount)})\n*خصم نقاط الولاء:* ${formatMoney(discount)} (${redeemedPoints.toLocaleString()} نقطة)\n\n*قائمة المنتجات المطلوبة:*\n${itemsText}\n\n*إجمالي المبلغ النهائي:* ${formatMoney(finalTotal)}\n*النقاط المكتسبة من الطلب:* ${pointsEarned.toLocaleString()} نقطة\n\nيرجى تأكيد الطلب وتحديد طريقة التحويل!`;
                 const whatsappUrl = `https://wa.me/201096429739?text=${encodeURIComponent(message)}`;
 
                 persistedOrders = nextPersistedOrders;
@@ -7210,6 +7483,38 @@ function escapeHtml(text) {
             subscribeToFirestoreCategories();
         }
 
+        async function syncFirestoreUserOrders(userId, orders) {
+            if (!userId || !firebaseAuth.currentUser || firebaseAuth.currentUser.uid !== userId) {
+                return;
+            }
+            await setDoc(doc(usersCollection, userId), {
+                orders: Array.isArray(orders) ? orders : [],
+                updatedAt: serverTimestamp()
+            }, { merge: true });
+        }
+
+        async function updateFirestoreOrderStatus(userId, orderId, statusLabel, statusKey) {
+            if (!isStoreAdmin()) throw new Error('غير مصرح لك بتحديث الطلبات.');
+            const userRef = doc(usersCollection, userId);
+            const snapshot = await getDoc(userRef);
+            if (!snapshot.exists()) throw new Error('سجل العميل غير موجود.');
+            const orders = Array.isArray(snapshot.data().orders) ? snapshot.data().orders : [];
+            let updated = false;
+            const nextOrders = orders.map(order => {
+                if (order.id !== orderId) return order;
+                if (order.returnRequest?.status === 'approved') throw new Error('لا يمكن تغيير حالة طلب اعتمد إرجاعه.');
+                updated = true;
+                return {
+                    ...order,
+                    status: statusLabel,
+                    deliveryStage: statusKey === 'completed' ? 'delivered' : statusKey === 'cancelled' ? 'cancelled' : 'confirmed',
+                    trackingStartedAt: statusKey === 'processing' ? new Date().toISOString() : order.trackingStartedAt
+                };
+            });
+            if (!updated) throw new Error('الطلب غير موجود في سجل العميل.');
+            await updateDoc(userRef, { orders: nextOrders, updatedAt: serverTimestamp() });
+        }
+
         window.addFirestoreProduct = addFirestoreProduct;
         window.updateFirestoreProduct = updateFirestoreProduct;
         window.deleteFirestoreProduct = deleteFirestoreProduct;
@@ -7217,6 +7522,8 @@ function escapeHtml(text) {
         window.removeFirestoreCategory = removeFirestoreCategory;
         window.updateFirestoreUserRole = updateFirestoreUserRole;
         window.removeFirestoreUser = removeFirestoreUser;
+        window.syncFirestoreUserOrders = syncFirestoreUserOrders;
+        window.updateFirestoreOrderStatus = updateFirestoreOrderStatus;
         initializeFirestoreCatalog();
 
         // تفعيل استمرارية الجلسة ومزامنة كل انتقالات حالة Firebase بعد تحميل المتجر.
