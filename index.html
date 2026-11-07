@@ -175,6 +175,18 @@
             overflow-x: clip;
         }
 
+        #storeHeader {
+            isolation: isolate;
+        }
+
+        #storeHeader > div:not(#announcementBar):not(.hide-scroll-bar) {
+            position: relative;
+        }
+
+        #storeHeader details[open] {
+            z-index: 50;
+        }
+
         img,
         video,
         canvas,
@@ -254,10 +266,30 @@
                 font-size: 0.68rem;
             }
 
+            #storeHeader .category-nav-item {
+                min-height: 2rem;
+                scroll-snap-align: center;
+            }
+
+            #storeHeader details[open] .absolute {
+                left: auto;
+                right: 0;
+                transform: none;
+            }
+
             #authOpenButton {
                 flex-shrink: 0;
                 padding-inline: 0.5rem;
                 font-size: 0.68rem;
+            }
+
+            #storeHeader {
+                z-index: 45;
+            }
+
+            #storeHeader summary,
+            #storeHeader details {
+                position: relative;
             }
 
             #page-home,
@@ -444,30 +476,32 @@
     <div id="toastContainer" class="fixed top-20 left-4 right-4 sm:left-5 sm:right-auto z-[90] flex flex-col gap-2 w-auto sm:w-96 max-w-sm" aria-live="polite" aria-atomic="false"></div>
 
     <!-- ================= HEADER (AMAZON ENTERPRISE STYLE) ================= -->
-    <header class="sticky top-0 z-40 shadow-lg">
-        <!-- Top Main Navigation Bar -->
-        <div class="bg-amazon-navy text-white px-3 md:px-5 py-2 flex items-center justify-between gap-2 md:gap-4">
-            
-            <!-- Brand Logo -->
-            <div class="flex items-center gap-2 cursor-pointer border border-transparent hover:border-white p-1 rounded" onclick="navigateTo('home')">
-                <div class="bg-amazon-orange text-amazon-navy font-black text-2xl px-2.5 py-0.5 rounded tracking-tight flex items-center gap-1 shadow">
-                    <i class="fa-solid fa-microchip text-xl"></i>
-                    <span>الندم</span>
-                </div>
-              
-            </div>
+    <header id="storeHeader" class="sticky top-0 z-40 shadow-lg transition-shadow duration-300">
+        <div id="announcementBar" class="relative h-8 overflow-hidden bg-amazon-yellow px-3 text-center text-[11px] font-black text-amazon-navy sm:h-9 sm:text-xs" role="region" aria-label="إعلانات المتجر">
+            <div id="announcementText" class="flex h-full items-center justify-center transition-all duration-500">🚚 توصيل سريع لجميع المحافظات</div>
+        </div>
 
-            <!-- Delivery Location Pin -->
-            <!-- <div class="hidden lg:flex items-center text-xs text-gray-200 cursor-pointer border border-transparent hover:border-white p-1.5 rounded">
-                <i class="fa-solid fa-location-dot text-amazon-yellow text-lg ml-2"></i>
-                <div>
-                   
-                </div>
-            </div> -->
+        <!-- Top Main Navigation Bar -->
+        <div class="border-b border-white/10 bg-[rgba(19,25,33,0.88)] px-3 py-2 text-white backdrop-blur-[12px] supports-[backdrop-filter]:bg-[rgba(19,25,33,0.78)] md:px-5 md:py-2.5">
+            <div class="mx-auto flex max-w-7xl items-center justify-between gap-2 md:gap-4">
+            
+            <button id="mobileMenuButton" type="button" onclick="openMobileMenu()" class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white transition hover:border-amazon-yellow hover:text-amazon-yellow lg:hidden" aria-label="فتح قائمة الأقسام">
+                <i class="fa-solid fa-bars-staggered text-lg" aria-hidden="true"></i>
+            </button>
+
+            <!-- Brand Logo -->
+            <button type="button" class="group flex shrink-0 items-center gap-2 rounded-lg p-1 text-right" onclick="navigateTo('home')" aria-label="الانتقال إلى الرئيسية">
+                <span class="relative flex items-center gap-1.5 rounded-lg border border-amazon-orange/40 bg-amazon-orange px-2.5 py-1.5 text-xl font-black text-amazon-navy shadow-[0_0_18px_rgba(255,153,0,.22)] transition group-hover:shadow-[0_0_24px_rgba(255,153,0,.42)] md:text-2xl">
+                    <i class="fa-solid fa-microchip text-base md:text-xl" aria-hidden="true"></i>
+                    <span>الندم</span>
+                </span>
+            </button>
+
+           
 
             <!-- Right Actions Area -->
-            <div class="flex items-center gap-2 md:gap-4 text-xs">
-                <label for="currencySelect" title="أسعار تحويل تجريبية محفوظة محلياً وليست أسعاراً مباشرة" class="flex items-center gap-1 font-bold text-white">
+            <div class="flex min-w-0 items-center gap-1.5 text-xs sm:gap-2 md:gap-3">
+                <label for="currencySelect" title="أسعار تحويل تجريبية محفوظة محلياً وليست أسعاراً مباشرة" class="hidden items-center gap-1 font-bold text-white sm:flex">
                     <i class="fa-solid fa-coins text-amazon-yellow" aria-hidden="true"></i>
                     <select id="currencySelect" onchange="setStoreCurrency(this.value)" aria-label="عملة المتجر" class="rounded bg-white px-2 py-1.5 text-amazon-navy">
                         <option value="EGP">EGP ج.م</option>
@@ -489,16 +523,20 @@
                 </div>
 
                 <!-- Account / CRM Dropdown -->
-                <div onclick="navigateTo('crm')" class="cursor-pointer border border-transparent hover:border-white p-1.5 rounded flex items-center gap-2">
-                    <i class="fa-solid fa-user-gear text-amazon-yellow text-xl"></i>
-                    <div class="hidden sm:block leading-tight">
-                        <span id="accountHeaderName" class="block text-gray-300 text-[10px]">مرحباً بك</span>
-                        <span class="font-extrabold text-white">لوحة الـ CRM</span>
+                <details class="relative hidden min-w-0 shrink-0 sm:block">
+                    <summary class="flex max-w-[3rem] cursor-pointer list-none items-center gap-2 rounded-lg border border-transparent p-1.5 transition hover:border-white/30 hover:bg-white/5 lg:max-w-[11rem]">
+                        <i class="fa-solid fa-user-gear shrink-0 text-xl text-amazon-yellow"></i>
+                        <div class="hidden min-w-0 max-w-[8.75rem] leading-tight lg:block">
+                            <span id="accountHeaderName" class="block truncate text-[10px] text-gray-300">مرحباً بك</span>
+                            <span class="block truncate font-extrabold text-white">حسابي</span>
+                        </div>
+                    </summary>
+                    <div class="absolute left-1/2 top-[calc(100%+0.25rem)] z-50 w-[min(13rem,calc(100vw-2rem))] -translate-x-1/2 overflow-hidden rounded-lg border border-white/10 bg-[#1d2935] p-2 text-right shadow-2xl" dir="rtl">
+                        <button type="button" onclick="navigateTo('crm')" class="flex min-h-11 w-full items-center gap-2 rounded px-3 text-right text-xs font-bold hover:bg-white/10"><i class="fa-solid fa-user w-4 text-amazon-yellow"></i>لوحة العميل / CRM</button>
+                        <button id="authOpenButton" type="button" onclick="openAuthModal()" class="flex min-h-11 w-full items-center gap-2 rounded px-3 text-right text-xs font-bold text-amazon-yellow hover:bg-white/10"><i class="fa-solid fa-right-to-bracket w-4"></i>تسجيل الدخول</button>
+                        <button type="button" onclick="navigateTo('admin')" class="hidden min-h-11 w-full items-center gap-2 rounded px-3 text-right text-xs font-bold text-emerald-300 hover:bg-white/10 admin-dropdown-link"><i class="fa-solid fa-chart-line w-4"></i>لوحة الإدارة</button>
                     </div>
-                </div>
-                <button id="authOpenButton" type="button" onclick="openAuthModal()" class="rounded border border-amazon-yellow px-2 py-1.5 font-bold text-amazon-yellow hover:bg-amazon-yellow hover:text-amazon-navy">
-                    تسجيل الدخول
-                </button>
+                </details>
 
                 <button type="button" onclick="navigateTo('wishlist')" aria-label="قائمة المفضلة" class="relative cursor-pointer border border-transparent hover:border-white p-1.5 rounded flex items-center gap-1.5 text-pink-300">
                     <i class="fa-solid fa-heart text-xl"></i>
@@ -507,7 +545,7 @@
                 </button>
 
                 <!-- Trash Bin Page -->
-                <div onclick="navigateTo('trash')" class="cursor-pointer border border-transparent hover:border-white p-1.5 rounded flex items-center gap-1.5 relative">
+                <div onclick="navigateTo('trash')" class="relative hidden cursor-pointer items-center gap-1.5 rounded border border-transparent p-1.5 sm:flex hover:border-white">
                     <div class="relative">
                         <i class="fa-solid fa-trash-can text-red-400 text-xl"></i>
                         <span id="trashBadge" class="absolute -top-2 -right-2 bg-red-600 text-white font-extrabold text-[10px] rounded-full w-4 h-4 flex items-center justify-center">0</span>
@@ -519,7 +557,7 @@
                 </div>
 
                 <!-- Shopping Cart Icon -->
-                <div onclick="toggleCartDrawer()" class="cursor-pointer border border-transparent hover:border-white p-1.5 rounded flex items-center gap-2 text-amazon-yellow relative">
+                <button type="button" onclick="toggleCartDrawer()" class="relative flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border border-transparent p-1.5 text-amazon-yellow transition hover:border-white/30 hover:bg-white/5">
                     <div class="relative">
                         <i class="fa-solid fa-cart-shopping text-2xl"></i>
                         <span id="cartBadge" class="absolute -top-2 right-1.5 bg-amazon-orange text-amazon-navy font-black text-xs rounded-full w-5 h-5 flex items-center justify-center border border-amazon-navy shadow">0</span>
@@ -528,16 +566,17 @@
                         <span class="block text-gray-300 text-[10px]">عربة الشراء</span>
                         <span class="font-black text-amazon-yellow">السلة</span>
                     </div>
-                </div>
+                </button>
 
+            </div>
             </div>
         </div>
 
         <!-- شريط بحث مستقل أسفل الشريط الرئيسي لتسهيل الوصول إليه على كل أحجام الشاشات. -->
-        <div class="bg-white px-3 py-2 shadow-inner border-b border-gray-200">
+        <div class="border-b border-gray-200 bg-white/95 px-3 py-2 backdrop-blur-md shadow-[0_8px_20px_rgba(15,23,42,.08)]">
             <div class="mx-auto flex max-w-7xl items-center gap-2">
-                <div class="flex min-w-0 flex-1 items-center overflow-hidden rounded-md border border-gray-300">
-                    <select id="searchCategorySelect" onchange="filterProducts()" aria-label="تصفية البحث حسب القسم" class="hidden bg-gray-100 px-2 py-2.5 text-xs font-bold text-gray-800 focus:outline-none md:block">
+                <div class="flex min-h-11 min-w-0 flex-1 items-center overflow-hidden rounded-full border border-gray-300 bg-white shadow-sm transition focus-within:border-amazon-orange focus-within:ring-4 focus-within:ring-amazon-orange/10">
+                    <select id="searchCategorySelect" onchange="filterProducts()" aria-label="تصفية البحث حسب القسم" class="hidden h-full bg-gray-50 px-3 text-xs font-bold text-gray-800 outline-none md:block">
                         <option value="all">جميع الأقسام</option>
                         <option value="laptops">لابتوبات وكمبيوتر</option>
                         <option value="phones">هواتف وتابلت</option>
@@ -548,9 +587,9 @@
                         <option value="smarthome">منزل ذكي</option>
                         <option value="cables">شواحن ووصلات</option>
                     </select>
-                    <input type="search" id="searchInput" oninput="filterProducts()" aria-label="ابحث في منتجات المتجر" placeholder="ابحث عن منتج أو علامة تجارية..." class="w-full min-w-0 px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-amazon-orange placeholder-gray-400">
-                    <button type="button" onclick="filterProducts()" aria-label="بحث" class="bg-amazon-orange px-5 py-2.5 text-amazon-navy transition-colors hover:bg-amazon-orangeHover">
-                        <i class="fa-solid fa-magnifying-glass text-lg" aria-hidden="true"></i>
+                    <input type="search" id="searchInput" oninput="filterProducts()" aria-label="ابحث في منتجات المتجر" placeholder="ابحث عن منتج أو علامة تجارية..." class="w-full min-w-0 px-3 py-2.5 text-sm text-gray-900 outline-none placeholder-gray-400">
+                    <button type="button" onclick="filterProducts()" aria-label="بحث" class="mr-1 flex h-9 w-11 shrink-0 items-center justify-center rounded-full bg-amazon-orange text-amazon-navy transition-transform hover:bg-amazon-orangeHover active:scale-95 sm:w-12">
+                        <i class="fa-solid fa-magnifying-glass text-base sm:text-lg" aria-hidden="true"></i>
                     </button>
                 </div>
                 <button type="button" onclick="openProductQuiz()" class="shrink-0 rounded-md bg-amazon-navy px-3 py-2.5 text-[10px] font-black text-white hover:bg-amazon-lightNavy sm:px-4 sm:text-xs">
@@ -560,8 +599,8 @@
         </div>
 
         <!-- Sub-Header Secondary Bar -->
-        <div class="bg-amazon-lightNavy text-white px-4 py-1.5 text-xs flex items-center justify-between overflow-x-auto whitespace-nowrap shadow-inner border-t border-gray-700">
-            <div class="flex items-center gap-6">
+        <div class="relative z-10 min-h-10 border-t border-white/5 bg-amazon-lightNavy/95 px-4 py-1 text-xs text-white shadow-inner backdrop-blur-md">
+            <div class="hide-scroll-bar mx-auto flex min-h-8 max-w-7xl items-center gap-5 overflow-x-auto whitespace-nowrap py-0.5 sm:gap-6">
                 <button onclick="navigateTo('home')" class="hover:text-amazon-yellow font-extrabold flex items-center gap-1.5 text-amazon-yellow">
                     <i class="fa-solid fa-house text-sm"></i> الرئيسية
                 </button>
@@ -595,6 +634,36 @@
                 <span>خدمة العميل الفورية والطلب المباشر: 01024863950</span>
             </div> -->
         </div>
+
+        <div id="mobileMenuOverlay" class="fixed inset-0 z-[74] hidden bg-black/60 backdrop-blur-sm lg:hidden" onclick="closeMobileMenu()"></div>
+        <aside id="mobileMenuDrawer" class="fixed bottom-0 right-0 top-0 z-[75] hidden w-[min(86vw,22rem)] translate-x-full bg-[#101820] text-white shadow-2xl transition-transform duration-300 lg:hidden" aria-label="قائمة الأقسام الرئيسية">
+            <div class="flex items-center justify-between border-b border-white/10 px-4 py-4">
+                <button type="button" onclick="navigateTo('home'); closeMobileMenu();" class="flex items-center gap-2 text-lg font-black text-amazon-yellow">
+                    <i class="fa-solid fa-microchip" aria-hidden="true"></i> متجر الندم
+                </button>
+                <button type="button" onclick="closeMobileMenu()" class="flex h-11 w-11 items-center justify-center rounded-full text-gray-300 hover:bg-white/10 hover:text-white" aria-label="إغلاق القائمة">
+                    <i class="fa-solid fa-xmark text-xl" aria-hidden="true"></i>
+                </button>
+            </div>
+            <nav class="max-h-[calc(100dvh-5rem)] overflow-y-auto px-3 py-4">
+                <button type="button" onclick="navigateTo('home'); closeMobileMenu();" class="mb-2 flex min-h-12 w-full items-center gap-3 rounded-lg px-3 text-right font-bold hover:bg-white/10"><i class="fa-solid fa-house w-5 text-amazon-yellow"></i>الرئيسية</button>
+                <button type="button" onclick="navigateTo('catalog'); closeMobileMenu();" class="mb-2 flex min-h-12 w-full items-center gap-3 rounded-lg px-3 text-right font-bold hover:bg-white/10"><i class="fa-solid fa-layer-group w-5 text-amazon-yellow"></i>الكتالوج</button>
+                <div class="mb-2 border-t border-white/10 pt-3 text-[11px] font-black text-gray-400">تصفح الأقسام</div>
+                <button type="button" data-category="laptops" onclick="setCategoryFilter('laptops'); closeMobileMenu();" class="category-nav-item flex min-h-12 w-full items-center gap-3 rounded-lg px-3 text-right font-bold transition hover:bg-white/10 hover:text-amazon-yellow"><i class="fa-solid fa-chevron-left w-5 text-xs text-gray-500"></i>لابتوبات وكمبيوتر</button>
+                <button type="button" data-category="phones" onclick="setCategoryFilter('phones'); closeMobileMenu();" class="category-nav-item flex min-h-12 w-full items-center gap-3 rounded-lg px-3 text-right font-bold transition hover:bg-white/10 hover:text-amazon-yellow"><i class="fa-solid fa-chevron-left w-5 text-xs text-gray-500"></i>هواتف وتابلت</button>
+                <button type="button" data-category="monitors" onclick="setCategoryFilter('monitors'); closeMobileMenu();" class="category-nav-item flex min-h-12 w-full items-center gap-3 rounded-lg px-3 text-right font-bold transition hover:bg-white/10 hover:text-amazon-yellow"><i class="fa-solid fa-chevron-left w-5 text-xs text-gray-500"></i>شاشات وتلفزيونات</button>
+                <button type="button" data-category="gaming" onclick="setCategoryFilter('gaming'); closeMobileMenu();" class="category-nav-item flex min-h-12 w-full items-center gap-3 rounded-lg px-3 text-right font-bold transition hover:bg-white/10 hover:text-amazon-yellow"><i class="fa-solid fa-chevron-left w-5 text-xs text-gray-500"></i>القيمنق والألعاب</button>
+                <button type="button" data-category="audio" onclick="setCategoryFilter('audio'); closeMobileMenu();" class="category-nav-item flex min-h-12 w-full items-center gap-3 rounded-lg px-3 text-right font-bold transition hover:bg-white/10 hover:text-amazon-yellow"><i class="fa-solid fa-chevron-left w-5 text-xs text-gray-500"></i>الصوتيات والساعات</button>
+                <button type="button" data-category="cameras" onclick="setCategoryFilter('cameras'); closeMobileMenu();" class="category-nav-item flex min-h-12 w-full items-center gap-3 rounded-lg px-3 text-right font-bold transition hover:bg-white/10 hover:text-amazon-yellow"><i class="fa-solid fa-chevron-left w-5 text-xs text-gray-500"></i>الكاميرات والتصوير</button>
+                <button type="button" data-category="smarthome" onclick="setCategoryFilter('smarthome'); closeMobileMenu();" class="category-nav-item flex min-h-12 w-full items-center gap-3 rounded-lg px-3 text-right font-bold transition hover:bg-white/10 hover:text-amazon-yellow"><i class="fa-solid fa-chevron-left w-5 text-xs text-gray-500"></i>المنزل الذكي</button>
+                <button type="button" data-category="cables" onclick="setCategoryFilter('cables'); closeMobileMenu();" class="category-nav-item flex min-h-12 w-full items-center gap-3 rounded-lg px-3 text-right font-bold transition hover:bg-white/10 hover:text-amazon-yellow"><i class="fa-solid fa-chevron-left w-5 text-xs text-gray-500"></i>الشواحن والوصلات</button>
+                <div class="mt-3 border-t border-white/10 pt-3">
+                    <button type="button" onclick="navigateTo('wishlist'); closeMobileMenu();" class="flex min-h-12 w-full items-center gap-3 rounded-lg px-3 text-right font-bold text-pink-300 hover:bg-white/10"><i class="fa-solid fa-heart w-5"></i>المفضلة</button>
+                    <button type="button" onclick="toggleCartDrawer(true); closeMobileMenu();" class="flex min-h-12 w-full items-center gap-3 rounded-lg px-3 text-right font-bold text-amazon-yellow hover:bg-white/10"><i class="fa-solid fa-cart-shopping w-5"></i>سلة التسوق</button>
+                    <button type="button" onclick="navigateTo('crm'); closeMobileMenu();" class="flex min-h-12 w-full items-center gap-3 rounded-lg px-3 text-right font-bold hover:bg-white/10"><i class="fa-solid fa-user-gear w-5 text-amazon-yellow"></i>حسابي / CRM</button>
+                </div>
+            </nav>
+        </aside>
     </header>
 
     <!-- MAIN SPA ROUTER CONTAINER -->
@@ -1919,8 +1988,53 @@
             showToast?.('تم تجهيز رسالتك وفتح واتساب.', 'success');
         }
 
+        function initPremiumHeader() {
+            const announcements = [
+                '🚚 توصيل سريع لجميع المحافظات',
+                '🎁 خصومات تصل إلى 30%',
+                '💳 إمكانية التقسيط والدفع عند الاستلام'
+            ];
+            const text = document.getElementById('announcementText');
+            let announcementIndex = 0;
+            if (text) {
+                window.setInterval(() => {
+                    text.classList.add('opacity-0', '-translate-y-1');
+                    window.setTimeout(() => {
+                        announcementIndex = (announcementIndex + 1) % announcements.length;
+                        text.textContent = announcements[announcementIndex];
+                        text.classList.remove('opacity-0', '-translate-y-1');
+                    }, 250);
+                }, 3600);
+            }
+            window.addEventListener('scroll', () => {
+                const header = document.getElementById('storeHeader');
+                header?.classList.toggle('shadow-[0_14px_30px_rgba(15,23,42,.28)]', window.scrollY > 20);
+            }, { passive: true });
+        }
+
+        function openMobileMenu() {
+            const drawer = document.getElementById('mobileMenuDrawer');
+            const overlay = document.getElementById('mobileMenuOverlay');
+            if (!drawer || !overlay) return;
+            overlay.classList.remove('hidden');
+            drawer.classList.remove('hidden');
+            requestAnimationFrame(() => drawer.classList.remove('translate-x-full'));
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMobileMenu() {
+            const drawer = document.getElementById('mobileMenuDrawer');
+            const overlay = document.getElementById('mobileMenuOverlay');
+            if (!drawer || !overlay) return;
+            drawer.classList.add('translate-x-full');
+            overlay.classList.add('hidden');
+            window.setTimeout(() => drawer.classList.add('hidden'), 300);
+            document.body.style.overflow = '';
+        }
+
         document.addEventListener('keydown', (event) => {
             if (event.key !== 'Escape') return;
+            if (!document.getElementById('mobileMenuDrawer')?.classList.contains('hidden')) closeMobileMenu();
             if (!document.getElementById('customerInfoModal')?.classList.contains('hidden')) {
                 closeCustomerInfoModal();
             } else if (!document.getElementById('compareModal')?.classList.contains('hidden')) {
@@ -1932,6 +2046,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadStoreDataFromStorage();
             window.addEventListener('storage', handleStoreStorageChange);
+            initPremiumHeader();
             document.querySelectorAll('.category-nav-item[data-category]').forEach(button => {
                 button.addEventListener('click', () => setCategoryFilter(button.dataset.category));
             });
@@ -2406,8 +2521,10 @@
             const previousFirebaseUser = firebaseAuthenticatedUser;
             firebaseAuthenticatedUser = authUser || null;
             const adminButton = document.getElementById('adminNavButton');
+            const adminDropdownLink = document.querySelector('.admin-dropdown-link');
             const registerForm = document.getElementById('registerUserForm');
             if (adminButton) adminButton.classList.toggle('hidden', !isStoreAdmin());
+            if (adminDropdownLink) adminDropdownLink.classList.toggle('hidden', !isStoreAdmin());
             if (isStoreAdmin() && adminButton) {
                 adminButton.classList.remove('hidden');
                 adminButton.style.display = '';
