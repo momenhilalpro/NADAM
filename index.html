@@ -2072,7 +2072,7 @@
                         <i class="fa-solid fa-microchip"></i>
                     </span>
                     <div>
-                        <h2 id="footer-store-title" class="text-lg font-black text-white">متجر الندم</h2>
+                        <h2 id="footer-store-title" class="text-lg font-black text-white">متجر صقر العرب</h2>
                         <p class="text-xs text-gray-400">إلكترونيات مختارة بعناية</p>
                     </div>
                 </div>
@@ -6831,7 +6831,7 @@ function escapeHtml(text) {
     <!-- صفحة تسجيل الدخول -->
     <script type="module">
         import { firebaseConfig } from './firebase-config.js';
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+        import { initializeApp } from 'firebase/app';
         import {
             getAuth,
             onAuthStateChanged,
@@ -6847,7 +6847,7 @@ function escapeHtml(text) {
             updateProfile,
             sendEmailVerification,
             signOut
-        } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+        } from 'firebase/auth';
         import {
             getFirestore,
             collection,
@@ -6864,7 +6864,7 @@ function escapeHtml(text) {
             writeBatch,
             runTransaction,
             serverTimestamp
-        } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+        } from 'firebase/firestore';
 
         const missingFirebaseConfig = Object.entries(firebaseConfig)
             .filter(([, value]) => !value)
