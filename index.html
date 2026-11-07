@@ -3834,12 +3834,23 @@
                 const existingReview = activeUser
                     ? reviews.find(review => review.userId === firebaseAuthenticatedUser?.uid)
                     : null;
+                const canModerateReviews = isStoreAdmin();
                 const reviewList = reviews.length
                     ? reviews.map(review => `
                         <article class="border rounded-lg p-3 bg-gray-50">
                             <div class="flex flex-wrap items-center justify-between gap-2">
                                 <strong class="text-amazon-navy">${escapeHtml(review.customerName)}</strong>
-                                <time class="text-[10px] text-gray-500">${escapeHtml(new Date(review.createdAt).toLocaleDateString('ar-EG'))}</time>
+                                <div class="flex items-center gap-2">
+                                    <time class="text-[10px] text-gray-500">${escapeHtml(new Date(review.createdAt).toLocaleDateString('ar-EG'))}</time>
+                                    ${canModerateReviews ? `
+                                        <button type="button"
+                                            onclick="deleteProductReview('${escapeHtml(review.id)}')"
+                                            class="flex h-9 w-9 items-center justify-center rounded-full text-red-600 transition hover:bg-red-100 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+                                            aria-label="حذف التقييم" title="حذف التقييم">
+                                            <i class="fa-solid fa-trash" aria-hidden="true"></i>
+                                        </button>
+                                    ` : ''}
+                                </div>
                             </div>
                             <div class="text-amber-500 my-1" aria-label="التقييم ${review.rating} من 5">
                                 ${Array.from({ length: 5 }, (_, index) => `<i class="fa-${index < review.rating ? 'solid' : 'regular'} fa-star"></i>`).join(' ')}
@@ -3915,6 +3926,30 @@
             });
             starsContainer.addEventListener('mouseleave', () => paintStars(Number(input.value) || initialRating));
             paintStars(Number(input.value) || initialRating);
+        }
+
+        async function deleteProductReview(reviewId) {
+            if (!isStoreAdmin()) {
+                showToast('هذه العملية متاحة للمسؤولين فقط.', 'error');
+                return;
+            }
+            const safeReviewId = String(reviewId || '').trim();
+            if (!safeReviewId || safeReviewId.includes('/')) {
+                showToast('تعذر تحديد التقييم المراد حذفها.', 'error');
+                return;
+            }
+            if (!window.confirm('هل أنت تأكد من رغبتك في حذف هذا التقييم؟')) return;
+            if (typeof window.deleteProductRating !== 'function') {
+                showToast('خدمة حذف التقييمات غير جاهزة. أعد تحميل الصفحة.', 'error');
+                return;
+            }
+            try {
+                await window.deleteProductRating(safeReviewId);
+                showToast('تم حذف التقييم بنجاح.', 'success');
+            } catch (error) {
+                console.error('Product review deletion failed:', error);
+                showToast('تعذر حذف التقييم. تحقق من صلاحيات المسؤول وحاول مرة أخرى.', 'error');
+            }
         }
 
         // حفظ تقييم واحد لكل مستخدم ومنتج مع إتاحة تعديله لاحقاً.
@@ -7550,6 +7585,18 @@ function escapeHtml(text) {
             await deleteDoc(targetRef);
         }
 
+        async function deleteProductRating(reviewId) {
+            await ensureAuthReady();
+            if (!firebaseAuth.currentUser) throw new Error('يجب تسجيل الدخول أولاً.');
+            const email = String(firebaseAuth.currentUser.email || '').trim().toLowerCase();
+            const isPrimaryAdmin = email === PRIMARY_ADMIN_EMAIL;
+            const isRoleAdmin = currentFirestoreRole === 'admin';
+            if (!isPrimaryAdmin && !isRoleAdmin) throw new Error('هذه العملية متاحة للمسؤولين فقط.');
+            const safeReviewId = String(reviewId || '').trim();
+            if (!safeReviewId || safeReviewId.includes('/')) throw new Error('معرّف التقييم غير صالح.');
+            await deleteDoc(doc(ratingsCollection, safeReviewId));
+        }
+
         async function writeProductRating(payload) {
             await ensureAuthReady();
             const user = firebaseAuth.currentUser;
@@ -7727,6 +7774,7 @@ function escapeHtml(text) {
         window.signOutStoreUser = signOutStoreUser;
         window.writeProductRating = writeProductRating;
         window.subscribeProductRatings = subscribeProductRatings;
+        window.deleteProductRating = deleteProductRating;
         document.addEventListener('DOMContentLoaded', () => {
             const authModal = document.getElementById('authModal');
             authModal?.addEventListener('click', event => {
