@@ -12,7 +12,49 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <script>
-        // Authentication inline-action bridge for the period before the Firebase module finishes loading.
+        // جسر آمن حتى يكتمل تحميل وحدة Firebase Authentication.
+        let resolveStoreAuthReady;
+        let rejectStoreAuthReady;
+        window.storeAuthReadyState = 'loading';
+        window.storeAuthReadyPromise = new Promise((resolve, reject) => {
+            resolveStoreAuthReady = resolve;
+            rejectStoreAuthReady = reject;
+        });
+        window.markStoreAuthReady = function markStoreAuthReady() {
+            window.storeAuthReadyState = 'ready';
+            resolveStoreAuthReady?.(true);
+            document.querySelectorAll('[data-auth-action]').forEach(button => {
+                button.disabled = false;
+                button.classList.remove('cursor-wait', 'opacity-60');
+            });
+        };
+        window.markStoreAuthUnavailable = function markStoreAuthUnavailable(error) {
+            window.storeAuthReadyState = 'unavailable';
+            rejectStoreAuthReady?.(error);
+            const message = error?.message || 'خدمات تسجيل الدخول غير متاحة حالياً.';
+            document.getElementById('authMessage')?.replaceChildren(message);
+        };
+        window.waitForStoreAuth = async function waitForStoreAuth(timeoutMs = 12000) {
+            if (window.storeAuthReadyState === 'ready') return true;
+            if (window.storeAuthReadyState === 'unavailable') throw new Error('خدمات تسجيل الدخول غير متاحة حالياً.');
+            let timeoutId;
+            const timeout = new Promise((_, reject) => {
+                timeoutId = window.setTimeout(() => reject(new Error('استغرق تهيئة خدمات تسجيل الدخول وقتاً أطول من المتوقع.')), timeoutMs);
+            });
+            try {
+                await Promise.race([window.storeAuthReadyPromise, timeout]);
+                return true;
+            } finally {
+                window.clearTimeout(timeoutId);
+            }
+        };
+        window.setAuthFallbackMessage = function setAuthFallbackMessage(message) {
+            const element = document.getElementById('authMessage');
+            if (!element) return;
+            element.textContent = message;
+            element.className = 'min-h-5 text-xs text-gray-600';
+        };
+
         window.openAuthModal = function openAuthModalFallback() {
             const modal = document.getElementById('authModal');
             const password = document.getElementById('authPassword');
@@ -29,20 +71,35 @@
         };
         window.submitEmailAuth = function submitEmailAuthFallback(event) {
             event?.preventDefault?.();
-            window.showToast?.('خدمات تسجيل الدخول لا تزال تُهيأ. انتظر لحظة ثم أعد المحاولة.', 'info');
+            window.setAuthFallbackMessage('جارٍ تهيئة خدمات تسجيل الدخول. انتظر لحظة...');
+            window.waitForStoreAuth().then(() => {
+                if (typeof window.submitEmailAuth === 'function') window.submitEmailAuth(event);
+            }).catch(error => window.setAuthFallbackMessage(error.message));
         };
         window.signInWithGoogle = function signInWithGoogleFallback() {
-            window.showToast?.('خدمات تسجيل الدخول لا تزال تُهيأ. انتظر لحظة ثم أعد المحاولة.', 'info');
+            window.setAuthFallbackMessage('جارٍ تهيئة خدمات تسجيل الدخول. انتظر لحظة...');
+            window.waitForStoreAuth().then(() => window.signInWithGoogle?.()).catch(error => window.setAuthFallbackMessage(error.message));
         };
         window.signInAnonymously = function signInAnonymouslyFallback() {
-            window.showToast?.('خدمات تسجيل الدخول لا تزال تُهيأ. انتظر لحظة ثم أعد المحاولة.', 'info');
+            window.setAuthFallbackMessage('جارٍ تهيئة خدمات تسجيل الدخول. انتظر لحظة...');
+            window.waitForStoreAuth().then(() => window.signInAnonymously?.()).catch(error => window.setAuthFallbackMessage(error.message));
         };
         window.sendPhoneVerificationCode = function sendPhoneVerificationCodeFallback() {
-            window.showToast?.('خدمات تسجيل الدخول لا تزال تُهيأ. انتظر لحظة ثم أعد المحاولة.', 'info');
+            window.setAuthFallbackMessage('جارٍ تهيئة خدمات تسجيل الدخول. انتظر لحظة...');
+            window.waitForStoreAuth().then(() => window.sendPhoneVerificationCode?.()).catch(error => window.setAuthFallbackMessage(error.message));
         };
         window.verifyPhoneCode = function verifyPhoneCodeFallback() {
-            window.showToast?.('خدمات تسجيل الدخول لا تزال تُهيأ. انتظر لحظة ثم أعد المحاولة.', 'info');
+            window.setAuthFallbackMessage('جارٍ تهيئة خدمات تسجيل الدخول. انتظر لحظة...');
+            window.waitForStoreAuth().then(() => window.verifyPhoneCode?.()).catch(error => window.setAuthFallbackMessage(error.message));
         };
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.storeAuthReadyState !== 'ready') {
+                document.querySelectorAll('[data-auth-action]').forEach(button => {
+                    button.disabled = true;
+                    button.classList.add('cursor-wait', 'opacity-60');
+                });
+            }
+        });
         window.signOutStoreUser = function signOutStoreUserFallback() {
             window.closeAuthModal?.();
         };
@@ -2196,18 +2253,18 @@
                     <label class="block text-xs font-bold text-gray-700">كلمة المرور
                         <input id="authPassword" type="password" required minlength="6" autocomplete="current-password" class="mt-1 w-full rounded-lg border p-2.5 font-normal">
                     </label>
-                    <button id="authEmailSubmit" type="submit" class="w-full rounded-lg bg-amazon-orange px-4 py-2.5 font-black text-amazon-navy hover:bg-amazon-orangeHover">تسجيل الدخول</button>
+                    <button id="authEmailSubmit" data-auth-action type="submit" class="w-full rounded-lg bg-amazon-orange px-4 py-2.5 font-black text-amazon-navy hover:bg-amazon-orangeHover">تسجيل الدخول</button>
                 </form>
                 <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                    <button type="button" onclick="signInWithGoogle()" class="rounded-lg border border-gray-300 px-3 py-2.5 text-sm font-bold text-gray-800 hover:bg-gray-50"><i class="fa-brands fa-google ml-1 text-red-600" aria-hidden="true"></i>المتابعة باستخدام Google</button>
-                    <button type="button" onclick="signInAnonymously()" class="rounded-lg border border-gray-300 px-3 py-2.5 text-sm font-bold text-gray-800 hover:bg-gray-50"><i class="fa-solid fa-user-secret ml-1 text-amazon-blueLink" aria-hidden="true"></i>الدخول كزائر</button>
+                    <button type="button" data-auth-action onclick="signInWithGoogle()" class="rounded-lg border border-gray-300 px-3 py-2.5 text-sm font-bold text-gray-800 hover:bg-gray-50"><i class="fa-brands fa-google ml-1 text-red-600" aria-hidden="true"></i>المتابعة باستخدام Google</button>
+                    <button type="button" data-auth-action onclick="signInAnonymously()" class="rounded-lg border border-gray-300 px-3 py-2.5 text-sm font-bold text-gray-800 hover:bg-gray-50"><i class="fa-solid fa-user-secret ml-1 text-amazon-blueLink" aria-hidden="true"></i>الدخول كزائر</button>
                 </div>
                 <section class="space-y-3 rounded-lg border border-gray-200 p-3">
                     <h3 class="text-sm font-extrabold text-amazon-navy">الدخول برقم الهاتف</h3>
                     <label class="block text-xs font-bold text-gray-700">رقم الهاتف بصيغة دولية
                         <input id="authPhone" type="tel" autocomplete="tel" placeholder="+201012345678" dir="ltr" class="mt-1 w-full rounded-lg border p-2.5 font-normal">
                     </label>
-                    <button id="authSendCodeButton" type="button" onclick="sendPhoneVerificationCode()" class="w-full rounded-lg border border-amazon-navy px-4 py-2 text-sm font-bold text-amazon-navy hover:bg-gray-50">إرسال رمز التحقق</button>
+                    <button id="authSendCodeButton" data-auth-action type="button" onclick="sendPhoneVerificationCode()" class="w-full rounded-lg border border-amazon-navy px-4 py-2 text-sm font-bold text-amazon-navy hover:bg-gray-50">إرسال رمز التحقق</button>
                     <div id="authPhoneCodePanel" class="hidden space-y-2">
                         <label class="block text-xs font-bold text-gray-700">رمز التحقق
                             <input id="authPhoneCode" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="8" dir="ltr" class="mt-1 w-full rounded-lg border p-2.5 font-normal">
@@ -6766,6 +6823,7 @@ function escapeHtml(text) {
             console.warn(
                 `[Store] Firebase authentication is unavailable. Missing configuration: ${missingFirebaseConfig.join(', ')}`
             );
+            window.markStoreAuthUnavailable?.(new Error('إعدادات Firebase غير مكتملة. تواصل مع إدارة المتجر.'));
         } else {
         // أضف البريد الإداري الموثوق إلى هذه القائمة قبل النشر؛ لا تُمنح الصلاحية افتراضياً.
         const PRIMARY_ADMIN_EMAIL = 'momenhilal6942@gmail.com';
@@ -6837,8 +6895,11 @@ function escapeHtml(text) {
         }
 
         // التأكد من تهيئة Firebase وحفظ الجلسة محلياً قبل تنفيذ أي عملية دخول.
-        function ensureAuthReady() {
-            if (!authReady) throw new Error('تعذر تهيئة المصادقة المستمرة. أعد تحميل الصفحة وحاول مجدداً.');
+        async function ensureAuthReady() {
+            await window.waitForStoreAuth();
+            if (!authReady || !firebaseAuth) {
+                throw new Error('تعذر تهيئة المصادقة المستمرة. أعد تحميل الصفحة وحاول مجدداً.');
+            }
         }
 
         function requireVerifiedFirebaseAdmin() {
@@ -6898,7 +6959,7 @@ function escapeHtml(text) {
             event.preventDefault();
             setAuthMessage('');
             try {
-                ensureAuthReady();
+                await ensureAuthReady();
                 const email = document.getElementById('authEmail').value.trim();
                 const password = document.getElementById('authPassword').value;
                 if (authMode === 'signup') {
@@ -6928,7 +6989,7 @@ function escapeHtml(text) {
         async function signInWithGoogle() {
             setAuthMessage('');
             try {
-                ensureAuthReady();
+                await ensureAuthReady();
                 await signInWithPopup(firebaseAuth, new GoogleAuthProvider());
                 setAuthMessage('تم تسجيل الدخول باستخدام Google.', false);
             } catch (error) {
@@ -6943,7 +7004,7 @@ function escapeHtml(text) {
         async function signInAnonymously() {
             setAuthMessage('');
             try {
-                ensureAuthReady();
+                await ensureAuthReady();
                 await firebaseSignInAnonymously(firebaseAuth);
                 setAuthMessage('تم الدخول كزائر.', false);
             } catch (error) {
@@ -6963,7 +7024,7 @@ function escapeHtml(text) {
                 return;
             }
             try {
-                ensureAuthReady();
+                await ensureAuthReady();
                 if (recaptchaVerifier) {
                     recaptchaVerifier.clear();
                     recaptchaVerifier = null;
@@ -7533,6 +7594,7 @@ function escapeHtml(text) {
             onAuthStateChanged(firebaseAuth, async user => {
                 const revision = ++authStateRevision;
                 currentAuthUser = user;
+                window.markStoreAuthReady?.();
                 if (!user) {
                     currentFirestoreRole = 'customer';
                     if (roleUnsubscribe) roleUnsubscribe();
@@ -7571,11 +7633,13 @@ function escapeHtml(text) {
             }, error => {
                 console.error('Firebase auth state listener failed:', error);
                 setAuthMessage('تعذر التحقق من جلسة Firebase الحالية. أعد تحميل الصفحة.');
+                window.markStoreAuthUnavailable?.(error);
             });
         } catch (error) {
             console.error('Firebase persistence initialization failed:', error);
             setAuthMessage('تعذر تهيئة حفظ الجلسة. تحقق من اتصال Firebase ثم أعد تحميل الصفحة.');
             window.showToast?.('تعذر تهيئة جلسة تسجيل الدخول المستمرة.', 'error');
+            window.markStoreAuthUnavailable?.(error);
         }
 
         window.openAuthModal = openAuthModal;
