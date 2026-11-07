@@ -2427,7 +2427,6 @@
         let compareAnalysisRequestId = 0;
         // إعداد قواعد الولاء ومفتاح التخزين؛ كل نقطتين تساويان جنيهاً واحداً من الخصم.
         const loyaltyStorageKey = 'alNadamMultiUserStoreV1';
-        const reviewStorageKey = 'alNadamProductReviewsV1';
         const catalogStorageKey = 'alNadamCatalogV1';
         const currencyStorageKey = 'alNadamCurrencySettingsV1';
         const promoCouponStorageKey = 'alNadamSpinCouponsV1';
@@ -2465,6 +2464,7 @@
         let userTrash = [];
         let persistedOrders = [];
         let productReviewsById = {};
+        let productRatingsUnsubscribe = null;
         let currentProductModalId = null;
         let currentInvoiceOrder = null;
         let activeCategory = 'all';
@@ -2929,7 +2929,7 @@
         }
 
 
-        // التحقق من صلاحية الحملة وتحديد السعر الجاري دون تعديل السعر الأساسي للكتالوج.
+        // ملاحظة: الحملات المحلية لا تغير سعر المنتج؛ السعر المصدر الوحيد هو product.price.
         function isFlashSaleActive() {
             return !flashSaleState.expired && flashSaleState.endsAt > Date.now();
         }
@@ -2940,21 +2940,11 @@
                 ? productsData.find(entry => entry.id === productOrId)
                 : productOrId;
             if (!product) return 0;
-            return isFlashSaleActive() && product.isDeal
-                ? Math.round(product.price * (100 - flashSaleDiscountPercent) / 100)
-                : product.price;
+            return Number(product.price) || 0;
         }
 
-        // بناء عرض السعر مع توضيح السعر الأصلي ونسبة الخصم خلال الحملة فقط.
+        // بناء عرض السعر مباشرة من وثيقة المنتج، دون تعديلات مرتبطة بالحساب أو الجلسة.
         function renderProductPrice(product, className = 'text-base') {
-            const salePrice = getEffectiveProductPrice(product);
-            if (salePrice < product.price) {
-                return `<div class="flex flex-wrap items-baseline gap-2 ${className}">
-                    <span class="font-black text-red-700">${formatMoney(salePrice)}</span>
-                    <span class="text-xs text-gray-400 line-through">${formatMoney(product.price)}</span>
-                    <span class="rounded bg-red-100 px-1.5 py-0.5 text-[9px] font-black text-red-700">خصم ${flashSaleDiscountPercent}٪</span>
-                </div>`;
-            }
             return `<div class="${className} font-black text-amazon-navy">${formatMoney(product.price)}
                 <span class="mr-1 text-xs font-normal text-gray-400 line-through">${formatMoney(product.oldPrice)}</span>
             </div>`;
@@ -3708,55 +3698,33 @@
             `;
             document.getElementById('productModal').classList.remove('hidden');
             renderProductReviews(id);
+            if (typeof window.subscribeProductRatings === 'function') {
+                if (typeof productRatingsUnsubscribe === 'function') productRatingsUnsubscribe();
+                productRatingsUnsubscribe = window.subscribeProductRatings(id, reviews => {
+                    productReviewsById = { ...productReviewsById, [id]: reviews };
+                    if (currentProductModalId === id) {
+                        renderProductReviews(id);
+                        filterProducts();
+                    }
+                });
+            }
         }
 
         // إغلاق تفاصيل المنتج وإزالة معرّف المنتج المعروض حالياً.
         function closeProductModal() {
             document.getElementById('productModal').classList.add('hidden');
             currentProductModalId = null;
+            if (typeof productRatingsUnsubscribe === 'function') productRatingsUnsubscribe();
+            productRatingsUnsubscribe = null;
         }
 
         // تحميل التقييمات المشتركة والتحقق من بياناتها قبل عرضها.
         function loadProductReviews() {
             try {
-                const savedReviews = localStorage.getItem(reviewStorageKey);
-                if (!savedReviews) {
-                    productReviewsById = {};
-                    return true;
-                }
-
-                const parsedReviews = JSON.parse(savedReviews);
-                if (!parsedReviews || typeof parsedReviews !== 'object' || Array.isArray(parsedReviews)) {
-                    throw new Error('Invalid product reviews');
-                }
-
-                productReviewsById = Object.fromEntries(
-                    Object.entries(parsedReviews).map(([productId, reviews]) => {
-                        const numericProductId = Number(productId);
-                        const productExists = productsData.some(product => product.id === numericProductId);
-                        if (!productExists || !Array.isArray(reviews)) return [productId, []];
-                        return [numericProductId, reviews.filter(review =>
-                            review && review.productId === numericProductId &&
-                            typeof review.userId === 'string' &&
-                            typeof review.customerName === 'string' &&
-                            Number.isInteger(review.rating) && review.rating >= 1 && review.rating <= 5 &&
-                            typeof review.comment === 'string' &&
-                            typeof review.createdAt === 'string'
-                        ).map(review => ({
-                            id: typeof review.id === 'string' ? review.id : `${review.userId}-${numericProductId}`,
-                            productId: numericProductId,
-                            userId: review.userId,
-                            customerName: review.customerName.slice(0, 100),
-                            rating: review.rating,
-                            comment: review.comment.slice(0, 1000),
-                            createdAt: review.createdAt
-                        }))];
-                    })
-                );
+                // Firestore owns reviews; local storage is intentionally not used.
                 return true;
             } catch (error) {
                 productReviewsById = {};
-                showToast('تعذر تحميل تقييمات المنتجات المحفوظة.', 'navy');
                 return false;
             }
         }
@@ -3803,12 +3771,6 @@
                     }
                     return;
                 }
-                if (event.key === reviewStorageKey) {
-                    if (!loadProductReviews()) return;
-                    filterProducts();
-                    if (currentProductModalId !== null) renderProductReviews(currentProductModalId);
-                    return;
-                }
                 if (event.key === currencyStorageKey) {
                     loadCurrencySettings();
                     updateCurrencySelector();
@@ -3853,7 +3815,7 @@
         function getProductRatingSummary(product) {
             const reviews = productReviewsById[product.id] || [];
             if (reviews.length === 0) {
-                return { rating: product.rating, numericRating: Number(product.rating), count: product.reviews };
+                return { rating: '0.0', numericRating: 0, count: 0 };
             }
             const average = reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length;
             return { rating: average.toFixed(1), numericRating: average, count: reviews.length };
@@ -3870,7 +3832,7 @@
                     .sort((first, second) => new Date(second.createdAt) - new Date(first.createdAt));
                 const summary = getProductRatingSummary(product);
                 const existingReview = activeUser
-                    ? reviews.find(review => review.userId === activeUserId)
+                    ? reviews.find(review => review.userId === firebaseAuthenticatedUser?.uid)
                     : null;
                 const reviewList = reviews.length
                     ? reviews.map(review => `
@@ -3956,7 +3918,7 @@
         }
 
         // حفظ تقييم واحد لكل مستخدم ومنتج مع إتاحة تعديله لاحقاً.
-        function submitProductReview(event, productId) {
+        async function submitProductReview(event, productId) {
             event.preventDefault();
             try {
                 if (!activeUser || !activeUserId) {
@@ -3984,24 +3946,24 @@
                     return;
                 }
 
-                const reviews = [...(productReviewsById[productId] || [])];
-                const existingIndex = reviews.findIndex(review => review.userId === activeUserId);
-                const review = {
-                    id: `${activeUserId}-${productId}`,
-                    productId,
-                    userId: activeUserId,
+                const firebaseUser = firebaseAuthenticatedUser;
+                if (!firebaseUser?.uid) {
+                    showToast('سجّل الدخول بحساب Firebase لإضافة التقييم ومزامنته.', 'navy');
+                    openAuthModal();
+                    return;
+                }
+                if (typeof window.writeProductRating !== 'function') {
+                    throw new Error('خدمة التقييمات غير جاهزة بعد. أعد تحميل الصفحة.');
+                }
+                const existingIndex = (productReviewsById[productId] || [])
+                    .findIndex(review => review.userId === firebaseUser.uid);
+                await window.writeProductRating({
+                    productId: Number(productId),
+                    userId: firebaseUser.uid,
                     customerName: name,
                     rating,
-                    comment,
-                    createdAt: new Date().toISOString()
-                };
-                if (existingIndex >= 0) reviews[existingIndex] = review;
-                else reviews.push(review);
-
-                const nextReviews = { ...productReviewsById, [productId]: reviews };
-                localStorage.setItem(reviewStorageKey, JSON.stringify(nextReviews));
-                productReviewsById = nextReviews;
-                renderProductReviews(productId);
+                    comment
+                });
                 filterProducts();
                 renderRecommendations();
                 renderPaginatedGrid();
@@ -6883,6 +6845,7 @@ function escapeHtml(text) {
         const productsCollection = collection(firestore, 'products');
         const categoriesCollection = collection(firestore, 'categories');
         const usersCollection = collection(firestore, 'users');
+        const ratingsCollection = collection(firestore, 'ratings');
         const productCounterRef = doc(firestore, 'meta', 'productCatalog');
         let authMode = 'login';
         let phoneConfirmation = null;
@@ -7587,6 +7550,69 @@ function escapeHtml(text) {
             await deleteDoc(targetRef);
         }
 
+        async function writeProductRating(payload) {
+            await ensureAuthReady();
+            const user = firebaseAuth.currentUser;
+            if (!user) throw new Error('يجب تسجيل الدخول أولاً.');
+            const productId = Number(payload.productId);
+            const rating = Number(payload.rating);
+            const customerName = String(payload.customerName || '').trim();
+            const comment = String(payload.comment || '').trim();
+            if (!Number.isSafeInteger(productId) || productId <= 0) throw new Error('معرّف المنتج غير صالح.');
+            if (!Number.isInteger(rating) || rating < 1 || rating > 5) throw new Error('التقييم يجب أن يكون من 1 إلى 5.');
+            if (!customerName || customerName.length > 100) throw new Error('اسم المراجع غير صالح.');
+            if (comment.length < 3 || comment.length > 1000) throw new Error('المراجعة غير صالحة.');
+
+            const ratingRef = doc(ratingsCollection, `${user.uid}_${productId}`);
+            const existing = await getDoc(ratingRef);
+            await setDoc(ratingRef, {
+                productId,
+                userId: user.uid,
+                customerName,
+                rating,
+                comment,
+                updatedAt: serverTimestamp(),
+                createdAt: existing.exists()
+                    ? existing.data().createdAt || serverTimestamp()
+                    : serverTimestamp()
+            }, { merge: true });
+        }
+
+        function subscribeProductRatings(productId, callback) {
+            const numericProductId = Number(productId);
+            if (!Number.isSafeInteger(numericProductId) || numericProductId <= 0) return () => {};
+            const ratingsQuery = query(ratingsCollection, where('productId', '==', numericProductId));
+            return onSnapshot(ratingsQuery, snapshot => {
+                const reviews = snapshot.docs.map(ratingDoc => {
+                    const data = ratingDoc.data();
+                    const createdAt = data.createdAt?.toDate?.()
+                        ? data.createdAt.toDate().toISOString()
+                        : (typeof data.updatedAt?.toDate === 'function'
+                            ? data.updatedAt.toDate().toISOString()
+                            : new Date().toISOString());
+                    return {
+                        id: ratingDoc.id,
+                        productId: Number(data.productId),
+                        userId: String(data.userId || ''),
+                        customerName: String(data.customerName || '').trim(),
+                        rating: Number(data.rating),
+                        comment: String(data.comment || ''),
+                        createdAt
+                    };
+                }).filter(review =>
+                    review.productId === numericProductId &&
+                    review.userId &&
+                    review.customerName &&
+                    Number.isInteger(review.rating) && review.rating >= 1 && review.rating <= 5 &&
+                    review.comment.length >= 3
+                );
+                callback(reviews);
+            }, error => {
+                console.error('Firestore ratings listener failed:', error);
+                showToast?.('تعذر تحميل تقييمات المنتج مباشرة من Firebase.', 'error');
+            });
+        }
+
         // بدء المستمعين العامين للكتالوج والأقسام مرة واحدة عند تحميل الوحدة.
         function initializeFirestoreCatalog() {
             subscribeToFirestoreProducts();
@@ -7699,6 +7725,8 @@ function escapeHtml(text) {
         window.sendPhoneVerificationCode = sendPhoneVerificationCode;
         window.verifyPhoneCode = verifyPhoneCode;
         window.signOutStoreUser = signOutStoreUser;
+        window.writeProductRating = writeProductRating;
+        window.subscribeProductRatings = subscribeProductRatings;
         document.addEventListener('DOMContentLoaded', () => {
             const authModal = document.getElementById('authModal');
             authModal?.addEventListener('click', event => {
