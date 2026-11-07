@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="صقر العرب">
+  <circle cx="50" cy="50" r="48" fill="#101820" stroke="#ffbd00" stroke-width="4"/>
+  <path d="M18 62c14-2 24-10 31-23-1 13 4 23 14 30-12-4-21-3-29 4 3-6 2-11-16-11z" fill="#fbbf24"/>
+  <path d="M49 38c7-12 19-17 34-13-9 4-14 11-15 20-7-4-13-6-19-7z" fill="#fff7c7"/>
+  <path d="M42 44c8-14 19-20 31-18-8 3-12 8-14 15 9 1 16 6 20 13-11-5-20-5-28-1z" fill="#f59e0b"/>
+  <path d="M58 51l15 5-14 7z" fill="#facc15"/>
+  <circle cx="70" cy="47" r="2.5" fill="#101820"/>
+</svg>

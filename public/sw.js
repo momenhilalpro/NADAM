@@ -1,11 +1,12 @@
-const CACHE_NAME = 'al-nadam-store-v2';
+const CACHE_NAME = 'al-nadam-store-v3';
 const OFFLINE_URL = './offline.html';
 const MAIN_PAGE_URL = './index.html';
 
 const CORE_ASSETS = [
     MAIN_PAGE_URL,
     OFFLINE_URL,
-    'https://cdn.tailwindcss.com',
+    '/falcon-logo.svg',
+    '/favicon.svg',
     'https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap',
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
 ];
@@ -76,7 +77,6 @@ self.addEventListener('fetch', event => {
     }
 
     const cachedAsset = new Set([
-        'cdn.tailwindcss.com',
         'fonts.googleapis.com',
         'fonts.gstatic.com',
         'cdnjs.cloudflare.com'
