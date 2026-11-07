@@ -170,6 +170,49 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+        #page-catalog.smartphones-page {
+            background: #020617;
+            border-radius: 1rem;
+            padding: clamp(.75rem, 2vw, 1.25rem);
+            box-shadow: 0 18px 50px rgba(2, 6, 23, .28);
+        }
+        .smartphones-banner {
+            position: relative;
+            isolation: isolate;
+            overflow: hidden;
+            border: 1px solid rgba(245, 158, 11, .28);
+            background:
+                radial-gradient(circle at 82% 20%, rgba(245, 158, 11, .18), transparent 25rem),
+                linear-gradient(135deg, #020617 0%, #0f172a 58%, #1c1917 100%);
+        }
+        .smartphones-banner::after {
+            content: "";
+            position: absolute;
+            inset: auto -4rem -8rem auto;
+            width: 16rem;
+            height: 16rem;
+            border-radius: 9999px;
+            border: 1px solid rgba(245, 158, 11, .12);
+            box-shadow: 0 0 70px rgba(245, 158, 11, .08) inset;
+            z-index: -1;
+        }
+        .phone-card {
+            background: linear-gradient(145deg, #172033, #0f172a);
+            border: 1px solid rgba(148, 163, 184, .12);
+            box-shadow: 0 12px 30px rgba(2, 6, 23, .22);
+            transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+        }
+        .phone-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(245, 158, 11, .58);
+            box-shadow: 0 18px 42px rgba(245, 158, 11, .13);
+        }
+        .phone-card-image img {
+            transition: transform .45s cubic-bezier(.2,.8,.2,1);
+        }
+        .phone-card:hover .phone-card-image img {
+            transform: scale(1.06);
+        }
         @media print {
             body * {
                 visibility: hidden !important;
@@ -1214,15 +1257,31 @@
         </section>
 
         <!-- ================= PAGE 2: FULL CATALOG PAGE (200 ITEMS WITH PAGINATION) ================= -->
-        <section id="page-catalog" class="page-tab space-y-6">
-            <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex flex-wrap justify-between items-center gap-4">
+        <section id="page-catalog" class="page-tab smartphones-page space-y-6">
+            <div class="smartphones-banner rounded-2xl p-5 sm:p-7 md:p-8">
+                <div class="flex items-center gap-4">
+                    <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-amber-400/30 bg-amber-500/10 text-amber-400 shadow-[0_0_35px_rgba(245,158,11,.16)] sm:h-20 sm:w-20">
+                        <i class="fa-solid fa-mobile-screen-button text-3xl sm:text-4xl" aria-hidden="true"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <span class="mb-1.5 inline-flex items-center gap-2 rounded-full border border-amber-400/20 bg-amber-400/10 px-3 py-1 text-[10px] font-black text-amber-300">
+                            <span class="h-1.5 w-1.5 rounded-full bg-amber-400 shadow-[0_0_10px_#f59e0b]"></span>
+                            تصنيف الهواتف الذكية
+                        </span>
+                        <h1 class="text-xl font-black leading-tight text-white sm:text-3xl md:text-4xl">أحدث الهواتف الذكية</h1>
+                        <p class="mt-2 text-xs font-bold text-slate-300 sm:text-sm">خصومات تصل إلى 40% على أحدث إصدارات الموبايلات</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap justify-between items-center gap-4 rounded-xl border border-slate-700/60 bg-slate-900/80 p-4 shadow-lg">
                 <div>
-                    <h2 class="text-xl font-black text-amazon-navy">الكتالوج الشامل </h2>
-                    <p class="text-xs text-gray-500">تصفح واستكشف كافة الأجهزة المتاحة للشراء المباشر مع دعم الشحن وسداد الدفع المتعدد.</p>
+                    <h2 class="text-base font-black text-white sm:text-lg">كتالوج الهواتف الذكية</h2>
+                    <p class="mt-1 text-xs text-slate-400">تصفح أحدث الأجهزة مع ضمان الوكيل وخيارات الدفع والشحن المتعددة.</p>
                 </div>
                 <div class="flex items-center gap-3 text-xs">
-                    <span class="font-bold text-gray-700">ترتيب حسب:</span>
-                    <select id="sortBySelect" onchange="filterProducts()" class="bg-gray-100 border rounded p-2 text-xs font-bold">
+                    <span class="font-bold text-slate-300">ترتيب حسب:</span>
+                    <select id="sortBySelect" onchange="filterProducts()" class="rounded-lg border border-slate-600 bg-slate-800 px-3 py-2.5 text-xs font-bold text-white outline-none focus:border-amber-500">
                         <option value="default">الافتراضي (الأعلى مبيعاً)</option>
                         <option value="price-low">السعر: من الأقل للأعلى</option>
                         <option value="price-high">السعر: من الأعلى للأقل</option>
@@ -1289,7 +1348,7 @@
 
                 <!-- Products Catalog Grid & Pagination -->
                 <div class="lg:col-span-3 space-y-6">
-                    <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+                    <div id="productsGrid" class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3">
                         <!-- Dynamic Injection -->
                     </div>
 
@@ -3557,36 +3616,52 @@
             }
 
             grid.innerHTML = pageItems.map(product => `
-                <div class="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition flex flex-col justify-between">
+                <article class="phone-card group overflow-hidden rounded-2xl text-white">
                     <div>
-                        <div class="relative bg-gray-50 p-4 h-44 flex items-center justify-center cursor-pointer" onclick="openProductModal(${product.id})">
-                            <img src="${escapeHtml(product.img)}" alt="${escapeHtml(product.name)}" class="max-h-full max-w-full object-contain">
-                            <span class="absolute top-2 right-2 bg-amazon-orange text-amazon-navy font-extrabold text-[10px] px-2 py-0.5 rounded shadow">Prime</span>
-                            <div class="absolute top-2 left-2">${renderWishlistButton(product.id, 'h-9 w-9')}</div>
-                            <span class="absolute bottom-2 left-2 ${product.stock > 0 ? 'bg-red-100 text-red-700' : 'bg-gray-800 text-white'} font-bold text-[9px] px-1.5 py-0.5 rounded">${product.stock > 0 ? `متبقي ${product.stock} فقط!` : 'نفدت الكمية'}</span>
+                        <div class="phone-card-image relative flex h-52 cursor-pointer items-center justify-center overflow-hidden border-b border-slate-700/50 bg-[radial-gradient(circle_at_center,_#334155_0%,_#0f172a_72%)] p-5" onclick="openProductModal(${product.id})">
+                            <img src="${escapeHtml(product.img)}" alt="${escapeHtml(product.name)}" loading="lazy" class="max-h-full max-w-full object-contain drop-shadow-[0_18px_20px_rgba(0,0,0,.45)]">
+                            <span class="absolute right-3 top-3 rounded-lg bg-amber-500 px-2.5 py-1.5 text-[10px] font-black text-slate-950 shadow-[0_5px_18px_rgba(245,158,11,.28)]">
+                                خصم ${Math.max(5, Math.round((1 - (getEffectiveProductPrice(product) / product.oldPrice)) * 100))}%
+                            </span>
+                            <div class="absolute left-3 top-3">${renderWishlistButton(product.id, 'h-10 w-10 border border-slate-600 bg-slate-950/75 text-pink-300 backdrop-blur')}</div>
+                            <span class="absolute bottom-3 left-3 ${product.stock > 0 ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-400/20' : 'bg-red-500/15 text-red-300 border border-red-400/20'} rounded-full px-2.5 py-1 text-[9px] font-black backdrop-blur">${product.stock > 0 ? `متبقي ${product.stock} فقط` : 'نفدت الكمية'}</span>
                         </div>
-                        <div class="p-4 space-y-2">
-                            <h3 onclick="openProductModal(${product.id})" class="font-bold text-xs text-amazon-navy line-clamp-2 hover:text-amazon-blueLink cursor-pointer">${escapeHtml(product.name)}</h3>
-                            <p class="text-[11px] text-gray-500 line-clamp-1">${escapeHtml(product.specs)}</p>
-                            <div class="flex items-center gap-1 text-amber-500 text-xs">
+                        <div class="space-y-3 p-4 sm:p-5">
+                            <h3 onclick="openProductModal(${product.id})" class="line-clamp-2 cursor-pointer text-sm font-black text-white transition hover:text-amber-400 sm:text-base">${escapeHtml(product.name)}</h3>
+                            <p class="line-clamp-1 text-[11px] text-slate-400">${escapeHtml(product.specs)}</p>
+                            <div class="flex items-center gap-1 text-xs text-amber-400">
                                 <i class="fa-solid fa-star"></i>
-                                <span class="font-bold text-gray-700 ml-1">${getProductRatingSummary(product).rating}</span>
-                                <span class="text-gray-400 text-[10px]">(${getProductRatingSummary(product).count})</span>
+                                <span class="ml-1 font-black text-slate-200">${getProductRatingSummary(product).rating}</span>
+                                <span class="text-[10px] text-slate-500">(${getProductRatingSummary(product).count})</span>
                             </div>
-                            ${renderProductPrice(product, 'pt-1 text-lg')}
+                            <div class="flex items-end gap-2 pt-1">
+                                <span class="text-xl font-black text-amber-400 sm:text-2xl">${formatMoney(getEffectiveProductPrice(product))}</span>
+                                <span class="mb-1 text-xs font-bold text-slate-500 line-through">${formatMoney(product.oldPrice || getEffectiveProductPrice(product) * 1.2)}</span>
+                            </div>
                             <div>${renderPriceAlertButton(product.id, true)}</div>
                         </div>
                     </div>
-                    <div class="p-4 pt-0 space-y-2">
-                        <button onclick="addToCart(${product.id})" ${product.stock <= 0 ? 'disabled' : ''} class="w-full bg-amazon-yellow hover:bg-amazon-orange text-amazon-navy font-bold py-2 rounded text-xs shadow transition flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-50">
-                            <i class="fa-solid fa-cart-plus"></i> ${product.stock > 0 ? 'إضافة إلى السلة' : 'نفدت الكمية'}
+                    <div class="grid grid-cols-1 gap-2 px-4 pb-4 sm:px-5 sm:pb-5">
+                        <button onclick="addToCart(${product.id})" ${product.stock <= 0 ? 'disabled' : ''} class="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-amber-500 px-3 py-3 text-xs font-black text-slate-950 shadow-[0_8px_22px_rgba(245,158,11,.18)] transition hover:bg-amber-400 active:scale-[.98] disabled:cursor-not-allowed disabled:opacity-50">
+                            <i class="fa-solid fa-cart-plus"></i> ${product.stock > 0 ? 'أضف للسلة' : 'نفدت الكمية'}
                         </button>
-                        <button onclick="addToCompare(${product.id})" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-1 rounded text-[11px]">
-                            <i class="fa-solid fa-code-compare"></i> إضافة للمقارنة والنصيحة
+                        <button onclick="buyPhoneViaWhatsApp(${product.id})" ${product.stock <= 0 ? 'disabled' : ''} class="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-3 py-3 text-xs font-black text-emerald-300 transition hover:bg-emerald-500 hover:text-white active:scale-[.98] disabled:cursor-not-allowed disabled:opacity-50">
+                            <i class="fa-brands fa-whatsapp text-lg"></i> شراء مباشر عبر واتساب
                         </button>
                     </div>
-                </div>
+                </article>
             `).join('');
+        }
+
+        function buyPhoneViaWhatsApp(productId) {
+            const product = productsData.find(item => item.id === productId);
+            if (!product) {
+                showToast?.('تعذر العثور على المنتج.', 'error');
+                return;
+            }
+            const price = formatMoney(getEffectiveProductPrice(product));
+            const message = `مرحباً صقر العرب، أرغب في شراء هاتف من متجركم:\n\nالمنتج: ${product.name}\nالسعر: ${price}\nالمواصفات: ${product.specs}\n\nيرجى تأكيد توفر المنتج وطريقة الدفع والشحن.`;
+            window.open(`https://wa.me/201096429739?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
         }
 
         function changePage(delta) {
