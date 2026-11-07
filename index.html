@@ -227,6 +227,218 @@
             max-width: 200px !important;
         }
 
+        .premium-product-card {
+            min-width: 260px;
+            min-height: 590px;
+            border: 1px solid rgba(229, 231, 235, 0.95);
+            border-radius: 8px;
+            overflow: hidden;
+            background: #fff;
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @media (hover: hover) and (pointer: fine) {
+            .premium-product-card:hover {
+                transform: translateY(-8px);
+                border-color: rgba(255, 153, 0, 0.95);
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 153, 0, 0.22);
+            }
+        }
+        .premium-product-card .premium-card-image {
+            width: 100%;
+            height: 220px;
+            object-fit: contain;
+            transform: scale(1.15);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @media (hover: hover) and (pointer: fine) {
+            .premium-product-card:hover .premium-card-image {
+                transform: scale(1.18);
+            }
+        }
+        @media (max-width: 639px) {
+            .premium-product-card {
+                min-height: 540px;
+            }
+            .premium-product-card .premium-card-image {
+                height: clamp(190px, 54vw, 220px);
+                transform: scale(1.1);
+            }
+        }
+        .premium-card-actions {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        @media (max-width: 639px) {
+            .premium-card-actions {
+                opacity: 1 !important;
+                transform: translateY(0) !important;
+            }
+        }
+        @media (hover: hover) and (pointer: fine) {
+            .premium-card-actions {
+                opacity: 0;
+                transform: translateY(14px);
+                transition: opacity 0.25s ease, transform 0.25s ease;
+            }
+            .premium-product-card:hover .premium-card-actions {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .premium-card-rating,
+        .premium-card-price {
+            transition: transform 0.25s ease, color 0.25s ease;
+        }
+        @media (hover: hover) and (pointer: fine) {
+            .premium-product-card:hover .premium-card-rating,
+            .premium-product-card:hover .premium-card-price {
+                transform: scale(1.04);
+            }
+        }
+
+        .promo-grid-shell {
+            min-width: 0;
+        }
+        .promo-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 2fr) repeat(2, minmax(0, 1fr));
+            grid-template-rows: repeat(2, minmax(180px, 220px));
+            gap: 12px;
+        }
+        .promo-card-large {
+            grid-row: 1 / 3;
+        }
+        .promo-card {
+            min-width: 0;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .promo-card-image {
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @media (hover: hover) and (pointer: fine) {
+            .promo-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 18px 35px rgba(15, 23, 42, 0.24);
+            }
+            .promo-card:hover .promo-card-image {
+                transform: scale(1.03);
+            }
+        }
+        @media (max-width: 767px) {
+            .promo-grid-shell {
+                overflow: hidden;
+            }
+            .promo-grid {
+                grid-template-columns: repeat(4, min(78vw, 320px));
+                grid-template-rows: minmax(270px, 320px);
+                grid-auto-flow: column;
+                overflow-x: auto;
+                overscroll-behavior-inline: contain;
+                scroll-snap-type: x mandatory;
+                -webkit-overflow-scrolling: touch;
+                padding-bottom: 10px;
+                scrollbar-width: none;
+            }
+            .promo-grid::-webkit-scrollbar { display: none; }
+            .promo-card,
+            .promo-card-large {
+                grid-row: 1;
+                scroll-snap-align: start;
+            }
+            .promo-card-large {
+                grid-column: auto;
+            }
+            .promo-card-large > div.relative {
+                max-width: 82%;
+            }
+        }
+
+        .deal-product-card {
+            min-height: 430px;
+        }
+        .deal-card-image {
+            object-fit: contain;
+        }
+        @media (hover: hover) and (pointer: fine) {
+            .deal-product-card:hover .deal-card-image {
+                transform: scale(1.18);
+            }
+        }
+        @media (max-width: 639px) {
+            .deal-product-card {
+                min-width: 72vw !important;
+                max-width: 72vw !important;
+                min-height: 410px !important;
+            }
+            .deal-product-card > button > div {
+                height: 220px !important;
+            }
+        }
+
+        .login-promo-banner {
+            background: linear-gradient(105deg, rgba(255, 153, 0, 0.98), rgba(204, 12, 57, 0.92), rgba(19, 25, 33, 0.96));
+            background-size: 180% 180%;
+            animation: loginBannerGlow 2.8s ease-in-out infinite, loginBannerGradient 7s ease infinite;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        @media (hover: hover) and (pointer: fine) {
+            .login-promo-banner:hover {
+                transform: translateY(-2px) scale(1.01);
+                box-shadow: 0 16px 36px rgba(255, 153, 0, 0.32), 0 0 0 2px rgba(254, 189, 105, 0.42);
+            }
+        }
+        .login-promo-icon {
+            animation: loginIconPulse 2s ease-in-out infinite;
+        }
+        .login-promo-cta {
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+        @media (hover: hover) and (pointer: fine) {
+            .login-promo-banner:hover .login-promo-cta {
+                transform: translateX(-3px);
+                background-color: #fff;
+            }
+        }
+        @keyframes loginBannerGlow {
+            0%, 100% { box-shadow: 0 0 18px rgba(254, 189, 105, 0.22); }
+            50% { box-shadow: 0 0 34px rgba(254, 189, 105, 0.48); }
+        }
+        @keyframes loginBannerGradient {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        @keyframes loginIconPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .login-promo-banner, .login-promo-icon { animation: none; }
+        }
+        @media (max-width: 639px) {
+            .login-promo-banner {
+                align-items: center;
+                padding-inline: 0.75rem;
+            }
+            .login-promo-icon { width: 2.5rem; height: 2.5rem; }
+            .login-promo-cta {
+                min-width: 4.75rem;
+                text-align: center;
+            }
+        }
+
+        .deal-scroll-lane {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            overscroll-behavior-inline: contain;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+        .deal-scroll-lane::-webkit-scrollbar {
+            display: none;
+        }
+
         #aiChatWindow {
             width: min(24rem, calc(100vw - 2rem)) !important;
             max-height: calc(100dvh - 5rem);
@@ -613,6 +825,9 @@
         <!-- Sub-Header Secondary Bar -->
         <div class="relative z-10 min-h-10 border-t border-white/5 bg-amazon-lightNavy/95 px-4 py-1 text-xs text-white shadow-inner backdrop-blur-md">
             <div class="hide-scroll-bar mx-auto flex min-h-8 max-w-7xl items-center gap-5 overflow-x-auto whitespace-nowrap py-0.5 sm:gap-6">
+                <button id="megaMenuButton" type="button" onclick="toggleMegaMenu()" aria-expanded="false" aria-controls="megaMenuPanel" class="hidden min-h-8 shrink-0 items-center gap-2 rounded-md bg-white/10 px-3 font-black text-amazon-yellow transition hover:bg-amazon-yellow hover:text-amazon-navy lg:flex">
+                    <i class="fa-solid fa-bars-staggered text-sm" aria-hidden="true"></i> الفئات <i class="fa-solid fa-chevron-down text-[9px]" aria-hidden="true"></i>
+                </button>
                 <button onclick="navigateTo('home')" class="hover:text-amazon-yellow font-extrabold flex items-center gap-1.5 text-amazon-yellow">
                     <i class="fa-solid fa-house text-sm"></i> الرئيسية
                 </button>
@@ -645,6 +860,21 @@
                 <i class="fa-brands fa-whatsapp text-green-400 text-sm"></i>
                 <span>خدمة العميل الفورية والطلب المباشر: 01024863950</span>
             </div> -->
+        </div>
+
+        <div id="megaMenuBackdrop" class="fixed inset-x-0 bottom-0 top-[13rem] z-[39] hidden bg-black/45 backdrop-blur-[2px]" onclick="closeMegaMenu()"></div>
+        <div id="megaMenuPanel" class="absolute inset-x-0 top-full z-[41] hidden border-t border-gray-200 bg-white text-gray-900 shadow-2xl" dir="rtl">
+            <div class="mx-auto grid max-h-[min(520px,calc(100vh-13rem))] w-full max-w-7xl grid-cols-[220px_minmax(0,1fr)] overflow-hidden sm:grid-cols-[240px_minmax(0,1fr)]">
+                <aside class="border-l border-gray-200 bg-gray-50 py-3" aria-label="الفئات الرئيسية">
+                    <button type="button" data-mega-category="electronics" class="mega-main-category flex min-h-12 w-full items-center gap-3 border-r-4 border-transparent px-4 text-right text-sm font-black text-amazon-navy transition hover:border-amazon-orange hover:bg-white" data-main-category="electronics"><i class="fa-solid fa-microchip w-5 text-amazon-orange"></i>الإلكترونيات</button>
+                    <button type="button" data-mega-category="phones" class="mega-main-category flex min-h-12 w-full items-center gap-3 border-r-4 border-transparent px-4 text-right text-sm font-black text-amazon-navy transition hover:border-amazon-orange hover:bg-white" data-main-category="phones"><i class="fa-solid fa-mobile-screen-button w-5 text-amazon-orange"></i>الهواتف والتابلت</button>
+                    <button type="button" data-mega-category="laptops" class="mega-main-category flex min-h-12 w-full items-center gap-3 border-r-4 border-transparent px-4 text-right text-sm font-black text-amazon-navy transition hover:border-amazon-orange hover:bg-white" data-main-category="laptops"><i class="fa-solid fa-laptop w-5 text-amazon-orange"></i>اللابتوبات والكمبيوتر</button>
+                    <button type="button" data-mega-category="smart" class="mega-main-category flex min-h-12 w-full items-center gap-3 border-r-4 border-transparent px-4 text-right text-sm font-black text-amazon-navy transition hover:border-amazon-orange hover:bg-white" data-main-category="smart"><i class="fa-solid fa-house-signal w-5 text-amazon-orange"></i>الأجهزة الذكية</button>
+                </aside>
+                <section id="megaMenuContent" class="min-w-0 overflow-y-auto p-4 sm:p-6">
+                    <!-- Dynamic content -->
+                </section>
+            </div>
         </div>
 
         <div id="mobileMenuOverlay" class="fixed inset-0 z-[74] hidden bg-black/60 backdrop-blur-sm lg:hidden" onclick="closeMobileMenu()"></div>
@@ -695,7 +925,16 @@
                     </div>
                     <h1 class="text-2xl md:text-4xl font-black leading-tight text-white">تخفيضات أجهزة الذكاء الاصطناعي والإلكترونيات </h1>
                     <p class="text-gray-300 text-xs md:text-sm">   مع أكثر من 7 وسائل دفع وسداد تقسيط، و5 شركات شحن، وتأكيد فوري للطلب عبر الواتساب.</p>
-                     <p class="text-gray-300 text-xs md:text-sm"> سجل الدخول لتحصل علي افضل مميزاتنا </p>
+                    <button id="heroLoginPromotion" type="button" onclick="openAuthModal()" class="login-promo-banner mt-1 flex w-full max-w-xl items-center justify-between gap-3 rounded-lg border border-amazon-yellow/80 px-4 py-3 text-right shadow-[0_0_24px_rgba(254,189,105,.22)] sm:px-5" aria-label="تسجيل الدخول والاستفادة من مميزات متجر الندم">
+                        <span class="flex min-w-0 items-center gap-3">
+                            <span class="login-promo-icon flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-amazon-yellow text-amazon-navy"><i class="fa-solid fa-user-plus text-lg" aria-hidden="true"></i></span>
+                            <span class="min-w-0">
+                                <span class="block text-sm font-black text-white sm:text-base">سجّل الدخول لتحصل على أفضل مميزاتنا</span>
+                                <span class="mt-0.5 block text-[10px] font-bold text-amber-100 sm:text-xs">المفضلة • عروض حصرية • نقاط ولاء • تتبع الطلبات</span>
+                            </span>
+                        </span>
+                        <span class="login-promo-cta min-h-11 shrink-0 rounded-md bg-amazon-yellow px-3 py-2 text-xs font-black text-amazon-navy sm:px-5 sm:text-sm">سجل الآن <i class="fa-solid fa-arrow-left mr-1" aria-hidden="true"></i></span>
+                    </button>
                     <div class="pt-2 flex flex-wrap gap-3">
                         <button onclick="navigateTo('catalog')" class="bg-amazon-orange hover:bg-amazon-orangeHover text-amazon-navy font-black px-6 py-2.5 rounded shadow-md transition duration-200 text-xs md:text-sm">تصفح المنتجات بالكامل</button>
                         <button onclick="openAiChat()" class="bg-white hover:bg-gray-100 text-amazon-navy font-extrabold px-4 py-2.5 rounded shadow transition duration-200 text-xs md:text-sm flex items-center gap-2">
@@ -706,21 +945,111 @@
                 <i class="fa-solid fa-microchip absolute -left-10 -bottom-10 text-9xl text-white opacity-10 hidden sm:block"></i>
             </div>
 
-            <!-- Amazon Horizontal Deal Lane: Flash Deals -->
-            <div id="flashSaleSection" class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-                <div class="flex items-center justify-between mb-3 border-b pb-2">
-                    <h2 class="text-lg font-extrabold text-amazon-navy flex items-center gap-2">
-                        <i class="fa-solid fa-bolt text-amazon-orange"></i> عروض الصفقات الخاطفة
-                    </h2>
-                    <div class="flex items-center gap-3">
-                        <span id="flashSaleStatus" class="rounded-full bg-red-50 px-2.5 py-1 text-[10px] font-black text-red-700">خصم 15٪ على المنتجات المميزة</span>
-                        <span onclick="navigateTo('catalog')" class="text-xs text-amazon-blueLink font-bold cursor-pointer hover:underline">عرض الكتالوج كاملاً</span>
+            <!-- Promotional Campaign Mosaic -->
+            <section class="promo-grid-shell" aria-labelledby="promo-grid-title">
+                <div class="mb-3 flex items-end justify-between gap-3">
+                    <div>
+                        <span class="mb-1 block text-[10px] font-black text-[#e60023]">عروض مختارة لك</span>
+                        <h2 id="promo-grid-title" class="text-lg font-black text-amazon-navy sm:text-xl">البراندات اللي بتحبها بأسعار هتعجبّك</h2>
+                    </div>
+                    <button type="button" onclick="navigateTo('catalog')" class="shrink-0 text-xs font-black text-amazon-blueLink hover:underline">شوف كل العروض ←</button>
+                </div>
+                <div class="promo-grid">
+                    <article class="promo-card promo-card-large group relative overflow-hidden rounded-lg bg-[#101820] text-white" onclick="setCategoryFilter('laptops'); navigateTo('catalog')">
+                        <img src="https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=900&q=85" alt="عروض اللابتوبات والإلكترونيات" class="promo-card-image absolute inset-0 h-full w-full object-cover opacity-55">
+                        <div class="absolute inset-0 bg-gradient-to-l from-[#101820] via-[#101820]/70 to-transparent"></div>
+                        <div class="relative z-10 flex h-full max-w-[72%] flex-col justify-between p-5 sm:p-7">
+                            <div>
+                                <span class="inline-flex rounded-full bg-[#e60023] px-3 py-1 text-[10px] font-black text-white">عرض لفترة محدودة</span>
+                                <h3 class="mt-4 text-2xl font-black leading-tight sm:text-4xl">عروض تصل إلى 60%</h3>
+                                <p class="mt-2 text-xs leading-6 text-gray-200 sm:text-sm">لابتوبات وأجهزة الكمبيوتر المختارة بأفضل الأسعار.</p>
+                            </div>
+                            <button type="button" onclick="event.stopPropagation(); setCategoryFilter('laptops'); navigateTo('catalog')" class="mt-5 min-h-11 w-fit rounded-lg bg-amazon-orange px-5 text-sm font-black text-amazon-navy shadow-lg transition hover:bg-white">اشتري دلوقتي</button>
+                        </div>
+                    </article>
+
+                    <article class="promo-card group relative overflow-hidden rounded-lg bg-[#172033] text-white" onclick="setCategoryFilter('phones'); navigateTo('catalog')">
+                        <img src="https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=700&q=85" alt="عروض الهواتف الذكية" class="promo-card-image absolute inset-0 h-full w-full object-cover opacity-60">
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#172033] via-[#172033]/35 to-transparent"></div>
+                        <div class="relative z-10 flex h-full flex-col justify-end p-4 sm:p-5">
+                            <span class="mb-2 w-fit rounded-full bg-white/15 px-2.5 py-1 text-[9px] font-black backdrop-blur-sm">مدفوع مسبقاً</span>
+                            <h3 class="text-xl font-black sm:text-2xl">الهواتف الذكية</h3>
+                            <p class="mt-1 text-xs text-gray-200">خصومات تصل إلى 40%</p>
+                            <button type="button" onclick="event.stopPropagation(); setCategoryFilter('phones'); navigateTo('catalog')" class="mt-3 min-h-10 w-fit rounded-md bg-white px-3 text-xs font-black text-amazon-navy hover:bg-amazon-orange">تسوق الآن</button>
+                        </div>
+                    </article>
+
+                    <article class="promo-card group relative overflow-hidden rounded-lg bg-[#5a170b] text-white" onclick="setCategoryFilter('gaming'); navigateTo('catalog')">
+                        <img src="https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=700&q=85" alt="عروض أجهزة القيمنق" class="promo-card-image absolute inset-0 h-full w-full object-cover opacity-65">
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#3a0d06] via-transparent to-transparent"></div>
+                        <div class="relative z-10 flex h-full flex-col justify-end p-4 sm:p-5">
+                            <span class="mb-2 w-fit rounded-full bg-amazon-orange px-2.5 py-1 text-[9px] font-black text-amazon-navy">عرض قيمنق</span>
+                            <h3 class="text-xl font-black sm:text-2xl">جاهز للعب؟</h3>
+                            <p class="mt-1 text-xs text-orange-100">خصم إضافي على الملحقات</p>
+                            <button type="button" onclick="event.stopPropagation(); setCategoryFilter('gaming'); navigateTo('catalog')" class="mt-3 min-h-10 w-fit rounded-md border border-white/40 bg-white/10 px-3 text-xs font-black backdrop-blur-sm hover:bg-white hover:text-amazon-navy">اكتشف العروض</button>
+                        </div>
+                    </article>
+
+                    <article class="promo-card promo-card-small group relative overflow-hidden rounded-lg bg-[#0f766e] text-white" onclick="setCategoryFilter('audio'); navigateTo('catalog')">
+                        <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=85" alt="عروض السماعات والساعات" class="promo-card-image absolute inset-0 h-full w-full object-cover opacity-55">
+                        <div class="absolute inset-0 bg-gradient-to-l from-[#0a4d48] to-transparent"></div>
+                        <div class="relative z-10 flex h-full items-center p-4 sm:p-5">
+                            <div class="max-w-[70%]">
+                                <span class="text-[9px] font-black text-yellow-300">هدية لكل طلب</span>
+                                <h3 class="mt-1 text-lg font-black sm:text-xl">صوت وساعات</h3>
+                                <button type="button" onclick="event.stopPropagation(); setCategoryFilter('audio'); navigateTo('catalog')" class="mt-2 text-xs font-black underline decoration-amazon-yellow decoration-2 underline-offset-4">تسوق الآن</button>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="promo-card promo-card-small group relative overflow-hidden rounded-lg bg-[#202b45] text-white" onclick="setCategoryFilter('smarthome'); navigateTo('catalog')">
+                        <img src="https://images.unsplash.com/photo-1543512214-318c7553f230?w=600&q=85" alt="عروض المنزل الذكي" class="promo-card-image absolute inset-0 h-full w-full object-cover opacity-55">
+                        <div class="absolute inset-0 bg-gradient-to-l from-[#202b45] to-transparent"></div>
+                        <div class="relative z-10 flex h-full items-center p-4 sm:p-5">
+                            <div class="max-w-[70%]">
+                                <span class="text-[9px] font-black text-amazon-yellow">تقنية المنزل الذكي</span>
+                                <h3 class="mt-1 text-lg font-black sm:text-xl">بيت أذكى</h3>
+                                <button type="button" onclick="event.stopPropagation(); setCategoryFilter('smarthome'); navigateTo('catalog')" class="mt-2 text-xs font-black underline decoration-amazon-yellow decoration-2 underline-offset-4">استكشف الآن</button>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <!-- Amazon-style Electronics Deal Carousels -->
+            <section id="flashSaleSection" class="overflow-hidden rounded-lg border border-red-100 bg-white shadow-sm">
+                <div class="flex min-h-14 items-center justify-between gap-3 bg-[#e60023] px-4 py-3 text-white md:px-5">
+                    <div class="min-w-0">
+                        <h2 class="truncate text-sm font-black sm:text-lg">🔥 عروض 11.11 | الإلكترونيات واللابتوبات | خصم يصل إلى 50%</h2>
+                        <p class="mt-0.5 hidden text-[11px] text-white/80 sm:block">اختيارات مختارة من اللابتوبات والشاشات وملحقات القيمنق</p>
+                    </div>
+                    <div class="flex shrink-0 items-center gap-2">
+                        <button type="button" onclick="scrollDealLane('laptopDealsLane', -1)" class="flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white transition hover:bg-white hover:text-[#e60023]" aria-label="السابق"><i class="fa-solid fa-chevron-right"></i></button>
+                        <button type="button" onclick="scrollDealLane('laptopDealsLane', 1)" class="flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white transition hover:bg-white hover:text-[#e60023]" aria-label="التالي"><i class="fa-solid fa-chevron-left"></i></button>
                     </div>
                 </div>
-                <div class="flex gap-4 overflow-x-auto pb-3 hide-scroll-bar" id="horizontalDealsLane">
+                <div id="laptopDealsLane" class="deal-scroll-lane flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 py-4 sm:gap-4" dir="rtl">
                     <!-- Populated dynamically -->
                 </div>
-            </div>
+            </section>
+
+            <section class="overflow-hidden rounded-lg border border-orange-100 bg-white shadow-sm">
+                <div class="flex min-h-14 items-center justify-between gap-3 bg-[#e60023] px-4 py-3 text-white md:px-5">
+                    <div class="min-w-0">
+                        <h2 class="truncate text-sm font-black sm:text-lg">⚡ صفقات اليوم | الهواتف والإكسسوارات | خصم يصل إلى 40%</h2>
+                        <p class="mt-0.5 hidden text-[11px] text-white/80 sm:block">هواتف وسماعات وساعات وشواحن اختيرت بعناية</p>
+                    </div>
+                    <div class="flex shrink-0 items-center gap-2">
+                        <button type="button" onclick="scrollDealLane('mobileDealsLane', -1)" class="flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white transition hover:bg-white hover:text-[#e60023]" aria-label="السابق"><i class="fa-solid fa-chevron-right"></i></button>
+                        <button type="button" onclick="scrollDealLane('mobileDealsLane', 1)" class="flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white transition hover:bg-white hover:text-[#e60023]" aria-label="التالي"><i class="fa-solid fa-chevron-left"></i></button>
+                    </div>
+                </div>
+                <div id="mobileDealsLane" class="deal-scroll-lane flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 py-4 sm:gap-4" dir="rtl">
+                    <!-- Populated dynamically -->
+                </div>
+            </section>
+
+            <div class="hidden" id="horizontalDealsLane" aria-hidden="true"></div>
 
             <!-- Featured Categories Highlights Grid -->
             <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
@@ -764,7 +1093,7 @@
                     <h2 class="text-lg font-extrabold text-amazon-navy">أبرز المنتجات الموصى بها لك اليوم</h2>
                     <button onclick="navigateTo('catalog')" class="text-xs font-bold text-amazon-blueLink hover:underline">عرض الكتالوج كاملاً  &larr;</button>
                 </div>
-                <div id="homeFeaturedGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div id="homeFeaturedGrid" class="grid grid-cols-[repeat(auto-fit,minmax(min(300px,100%),1fr))] gap-4 md:gap-5 lg:gap-6">
                     <!-- Injected dynamically -->
                 </div>
             </div>
@@ -2034,6 +2363,14 @@
             }
         }
 
+        function syncLoginPromotionVisibility() {
+            const banner = document.getElementById('heroLoginPromotion');
+            if (!banner) return;
+            const authenticated = Boolean(firebaseAuthenticatedUser || activeUser);
+            banner.classList.toggle('hidden', authenticated);
+            banner.setAttribute('aria-hidden', String(authenticated));
+        }
+
         function syncMobileAuthControls() {
             const authenticated = typeof firebaseAuthenticatedUser !== 'undefined' && Boolean(firebaseAuthenticatedUser);
             const headerButton = document.getElementById('mobileHeaderAuthButton');
@@ -2045,6 +2382,85 @@
             if (menuButton) menuButton.classList.toggle('border-red-300', authenticated);
             if (menuButton) menuButton.classList.toggle('text-red-300', authenticated);
             if (menuText) menuText.textContent = authenticated ? 'تسجيل الخروج' : 'تسجيل الدخول';
+        }
+
+        const megaMenuGroups = {
+            electronics: {
+                title: 'الإلكترونيات',
+                items: [['monitors','الشاشات والتلفزيونات','fa-desktop'],['gaming','القيمنق والألعاب','fa-gamepad'],['audio','الصوتيات والساعات','fa-headphones'],['cameras','الكاميرات والتصوير','fa-camera']]
+            },
+            phones: {
+                title: 'الهواتف والتابلت',
+                items: [['phones','جميع الهواتف','fa-mobile-screen-button'],['audio','الساعات والسماعات','fa-headphones'],['cables','الشواحن والواي فاي','fa-plug-circle-bolt'],['smarthome','إكسسوارات ذكية','fa-house-laptop']]
+            },
+            laptops: {
+                title: 'اللابتوبات والكمبيوتر',
+                items: [['laptops','اللابتوبات','fa-laptop'],['monitors','الشاشات','fa-display'],['gaming','ملحقات القيمنق','fa-gamepad'],['cables','الشواحن والمحولات','fa-plug']]
+            },
+            smart: {
+                title: 'الأجهزة الذكية',
+                items: [['smarthome','المنزل الذكي','fa-house-signal'],['audio','الساعات الذكية','fa-clock'],['phones','أجهزة التابلت','fa-tablet-screen-button'],['cables','أجهزة وإكسسوارات','fa-bolt']]
+            }
+        };
+
+        function renderMegaMenuCategory(groupKey) {
+            const group = megaMenuGroups[groupKey] || megaMenuGroups.electronics;
+            const content = document.getElementById('megaMenuContent');
+            if (!content) return;
+            document.querySelectorAll('.mega-main-category').forEach(button => {
+                const active = button.dataset.mainCategory === groupKey;
+                button.classList.toggle('border-amazon-orange', active);
+                button.classList.toggle('bg-white', active);
+                button.classList.toggle('text-amazon-orange', active);
+            });
+            content.innerHTML = `
+                <div class="mb-4 flex items-center justify-between gap-3 border-b pb-3">
+                    <h3 class="text-lg font-black text-amazon-navy">${group.title}</h3>
+                    <button type="button" onclick="selectMegaCategory('all')" class="text-xs font-bold text-amazon-blueLink hover:underline">عرض الكل</button>
+                </div>
+                <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                    ${group.items.map((item, index) => `
+                        <button type="button" onclick="selectMegaCategory('${item[0]}')" class="group min-w-0 rounded-lg border border-gray-100 p-3 text-center transition hover:border-amazon-orange hover:bg-orange-50/40 hover:shadow-md" data-category="${item[0]}">
+                            <span class="relative mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 text-2xl text-amazon-navy transition group-hover:bg-amazon-yellow sm:h-20 sm:w-20">
+                                <i class="fa-solid ${item[2]}" aria-hidden="true"></i>
+                                ${index === 0 ? '<span class="absolute -left-2 top-0 rounded-full bg-[#e60023] px-1.5 py-0.5 text-[8px] font-black text-white">HOT</span>' : ''}
+                            </span>
+                            <span class="mt-2 block text-xs font-black text-amazon-navy sm:text-sm">${item[1]}</span>
+                        </button>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function openMegaMenu(groupKey = 'electronics') {
+            const panel = document.getElementById('megaMenuPanel');
+            const backdrop = document.getElementById('megaMenuBackdrop');
+            const button = document.getElementById('megaMenuButton');
+            if (!panel || !backdrop) return;
+            panel.classList.remove('hidden');
+            backdrop.classList.remove('hidden');
+            button?.setAttribute('aria-expanded', 'true');
+            renderMegaMenuCategory(groupKey);
+        }
+
+        function closeMegaMenu() {
+            const panel = document.getElementById('megaMenuPanel');
+            const backdrop = document.getElementById('megaMenuBackdrop');
+            const button = document.getElementById('megaMenuButton');
+            panel?.classList.add('hidden');
+            backdrop?.classList.add('hidden');
+            button?.setAttribute('aria-expanded', 'false');
+        }
+
+        function toggleMegaMenu() {
+            const panel = document.getElementById('megaMenuPanel');
+            panel?.classList.contains('hidden') ? openMegaMenu() : closeMegaMenu();
+        }
+
+        function selectMegaCategory(category) {
+            closeMegaMenu();
+            if (category === 'all') navigateTo('catalog');
+            else setCategoryFilter(category);
         }
 
         function openMobileMenu() {
@@ -2067,8 +2483,16 @@
             document.body.style.overflow = '';
         }
 
+        document.addEventListener('pointerdown', (event) => {
+            const panel = document.getElementById('megaMenuPanel');
+            const button = document.getElementById('megaMenuButton');
+            if (!panel || panel.classList.contains('hidden')) return;
+            if (!panel.contains(event.target) && !button?.contains(event.target)) closeMegaMenu();
+        });
+
         document.addEventListener('keydown', (event) => {
             if (event.key !== 'Escape') return;
+            if (!document.getElementById('megaMenuPanel')?.classList.contains('hidden')) closeMegaMenu();
             if (!document.getElementById('mobileMenuDrawer')?.classList.contains('hidden')) closeMobileMenu();
             if (!document.getElementById('customerInfoModal')?.classList.contains('hidden')) {
                 closeCustomerInfoModal();
@@ -2083,8 +2507,13 @@
             window.addEventListener('storage', handleStoreStorageChange);
             initPremiumHeader();
             syncMobileAuthControls();
+            syncLoginPromotionVisibility();
             document.querySelectorAll('.category-nav-item[data-category]').forEach(button => {
                 button.addEventListener('click', () => setCategoryFilter(button.dataset.category));
+            });
+            document.querySelectorAll('.mega-main-category').forEach(button => {
+                button.addEventListener('mouseenter', () => renderMegaMenuCategory(button.dataset.mainCategory));
+                button.addEventListener('click', () => renderMegaMenuCategory(button.dataset.mainCategory));
             });
             syncCompareBadges();
             let comparisonResizeTimer;
@@ -2557,6 +2986,7 @@
             const previousFirebaseUser = firebaseAuthenticatedUser;
             firebaseAuthenticatedUser = authUser || null;
             syncMobileAuthControls();
+            syncLoginPromotionVisibility();
             const adminButton = document.getElementById('adminNavButton');
             const adminDropdownLink = document.querySelector('.admin-dropdown-link');
             const registerForm = document.getElementById('registerUserForm');
@@ -2621,6 +3051,8 @@
                 showToast('تم تسجيل الدخول، لكن تعذر حفظ بيانات CRM محلياً. تحقق من مساحة التخزين.', 'error');
             }
             renderActiveUserUI();
+            syncLoginPromotionVisibility();
+            syncLoginPromotionVisibility();
             renderLoyaltyUI();
             renderOrdersHistory();
             updateTrashUI();
@@ -2733,46 +3165,98 @@
         // عرض المنتجات المميزة مع زر حفظ سريع في المفضلة.
         function renderHomeFeatured() {
             const container = document.getElementById('homeFeaturedGrid');
+            if (!container) return;
             const featured = productsData.slice(0, 4);
-            container.innerHTML = featured.map(product => `
-                <div class="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition flex flex-col justify-between">
+            container.innerHTML = featured.map(product => {
+                const summary = getProductRatingSummary(product);
+                const oldPrice = Math.max(Number(product.oldPrice) || 0, Number(product.price) || 0);
+                const currentPrice = Number(product.price) || 0;
+                const discount = oldPrice > currentPrice && oldPrice > 0
+                    ? Math.max(1, Math.round((oldPrice - currentPrice) / oldPrice * 100))
+                    : 0;
+                const soldCount = 20 + ((product.id * 37) % 281);
+                return `
+                <article class="premium-product-card flex min-w-0 flex-col justify-between">
                     <div>
-                        <div class="relative bg-gray-50 p-4 h-44 flex items-center justify-center cursor-pointer" onclick="openProductModal(${product.id})">
-                            <img src="${escapeHtml(product.img)}" alt="${escapeHtml(product.name)}" class="max-h-full max-w-full object-contain">
-                            <span class="absolute top-2 right-2 bg-amazon-orange text-amazon-navy font-extrabold text-[10px] px-2 py-0.5 rounded shadow">Prime</span>
-                            <div class="absolute top-2 left-2">${renderWishlistButton(product.id, 'h-9 w-9')}</div>
+                        <div class="relative h-[220px] overflow-hidden bg-gradient-to-b from-gray-50 to-white p-1 sm:h-[240px]">
+                            <button type="button" onclick="openProductModal(${product.id})" class="flex h-full w-full items-center justify-center" aria-label="عرض سريع لـ ${escapeHtml(product.name)}">
+                                <img src="${escapeHtml(product.img)}" alt="${escapeHtml(product.name)}" class="premium-card-image max-h-full max-w-full object-contain">
+                            </button>
+                            <span class="absolute right-3 top-3 rounded-md bg-[#e60023] px-2.5 py-1.5 text-sm font-black text-white shadow-md">-${discount}%</span>
+                            <div class="absolute left-3 top-3">${renderWishlistButton(product.id, 'h-10 w-10')}</div>
+                            <div class="premium-card-actions absolute inset-x-3 bottom-3 flex gap-2">
+                                <button type="button" onclick="openProductModal(${product.id})" class="min-h-11 flex-1 rounded-lg bg-amazon-navy px-2 text-xs font-black text-white shadow-lg transition hover:bg-amazon-lightNavy"><i class="fa-solid fa-eye ml-1 text-amazon-yellow"></i>عرض سريع</button>
+                                <button type="button" onclick="addToCompare(${product.id}); showToast('تمت الإضافة للمقارنة', 'info')" class="flex min-h-11 w-11 items-center justify-center rounded-lg bg-white text-amazon-navy shadow-lg transition hover:bg-gray-100" aria-label="إضافة للمقارنة"><i class="fa-solid fa-code-compare"></i></button>
+                            </div>
                         </div>
-                        <div class="p-4 space-y-2">
-                            <h3 onclick="openProductModal(${product.id})" class="font-bold text-xs text-amazon-navy line-clamp-2 hover:text-amazon-blueLink cursor-pointer">${escapeHtml(product.name)}</h3>
-                            <p class="text-[11px] text-gray-500 line-clamp-1">${escapeHtml(product.specs)}</p>
-                            ${renderProductPrice(product, 'text-base')}
+                        <div class="space-y-3 p-4 sm:p-5">
+                            <h3 onclick="openProductModal(${product.id})" class="line-clamp-2 min-h-10 cursor-pointer text-sm font-black leading-5 text-amazon-navy transition hover:text-amazon-blueLink">${escapeHtml(product.name)}</h3>
+                            <p class="line-clamp-1 text-xs text-gray-500">${escapeHtml(product.specs)}</p>
+                            <div class="premium-card-rating flex items-center gap-2 text-amber-500">
+                                <i class="fa-solid fa-star"></i>
+                                <strong class="text-sm text-gray-800">${summary.rating}</strong>
+                                <span class="text-[11px] text-gray-400">(${summary.count})</span>
+                            </div>
+                            <div class="premium-card-price">${renderProductPrice(product, 'text-xl sm:text-2xl')}</div>
+                            <div class="flex items-center justify-between gap-2 border-t border-gray-100 pt-3">
+                                <span class="text-[11px] font-bold text-gray-500">تم بيع ${soldCount}+</span>
+                                <div class="h-1.5 max-w-28 flex-1 overflow-hidden rounded-full bg-gray-100"><span class="block h-full rounded-full bg-[#e60023]" style="width:${Math.min(92, 35 + soldCount % 58)}%"></span></div>
+                            </div>
                             <div>${renderPriceAlertButton(product.id, true)}</div>
                         </div>
                     </div>
-                    <div class="p-4 pt-0">
-                        <button onclick="addToCart(${product.id})" ${product.stock <= 0 ? 'disabled' : ''} class="w-full bg-amazon-yellow hover:bg-amazon-orange text-amazon-navy font-bold py-2 rounded text-xs transition disabled:cursor-not-allowed disabled:opacity-50">
-                            ${product.stock > 0 ? 'إضافة إلى السلة' : 'نفدت الكمية'}
+                    <div class="p-4 pt-0 sm:p-5 sm:pt-0">
+                        <button type="button" onclick="addToCart(${product.id})" ${product.stock <= 0 ? 'disabled' : ''} class="flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-amazon-yellow px-4 text-sm font-black text-amazon-navy shadow-md transition hover:-translate-y-0.5 hover:bg-amazon-orange disabled:cursor-not-allowed disabled:opacity-50">
+                            <i class="fa-solid fa-cart-plus"></i>${product.stock > 0 ? 'أضف إلى السلة' : 'نفدت الكمية'}
                         </button>
                     </div>
-                </div>
-            `).join('');
+                </article>
+            `}).join('');
         }
 
         // عرض الصفقات الأفقية وإتاحة حفظ كل صفقة في قائمة المفضلة.
-        function renderHorizontalDeals() {
-            const lane = document.getElementById('horizontalDealsLane');
-            const deals = productsData.filter(p => p.isDeal).slice(0, 12);
+        function getDealCard(p, discountPercent) {
+            const originalPrice = Math.max(Number(p.oldPrice) || 0, Number(p.price) || 0);
+            const currentPrice = Number(p.price) || 0;
+            return `
+                <article class="deal-product-card relative min-w-[55vw] max-w-[55vw] snap-start overflow-hidden rounded-lg border border-gray-200 bg-white p-3 transition hover:-translate-y-0.5 hover:border-red-200 hover:shadow-lg sm:min-w-[260px] sm:max-w-[260px] lg:min-w-[280px] lg:max-w-[280px]">
+                    <div class="absolute left-2 top-2 z-10">${renderWishlistButton(p.id, 'h-9 w-9')}</div>
+                    <button type="button" onclick="openProductModal(${p.id})" class="block w-full text-right" aria-label="عرض ${escapeHtml(p.name)}">
+                        <div class="mb-2 flex h-[220px] items-center justify-center overflow-hidden rounded-md bg-gray-50 p-0 sm:h-[240px]">
+                            <img src="${escapeHtml(p.img)}" alt="${escapeHtml(p.name)}" class="deal-card-image h-full w-full object-contain scale-[1.15] transition-transform duration-400">
+                        </div>
+                        <span class="inline-flex rounded bg-[#e60023] px-2 py-1 text-[10px] font-black text-white">خصم ${discountPercent}%</span>
+                        <h4 class="mt-2 truncate text-sm font-black text-amazon-navy">${escapeHtml(p.name)}</h4>
+                    </button>
+                    <div class="mt-2 flex flex-wrap items-end gap-x-2 gap-y-1" dir="rtl">
+                        <strong class="text-lg font-black text-[#e60023]">${formatMoney(currentPrice)}</strong>
+                        <del class="text-xs text-gray-400">${formatMoney(originalPrice)}</del>
+                    </div>
+                    <div class="mt-3 flex items-center justify-between gap-2">
+                        <span class="text-[10px] font-bold text-amber-600"><i class="fa-solid fa-star ml-1"></i>${escapeHtml(String(getProductRatingSummary(p).rating))}</span>
+                        <button type="button" onclick="addToCart(${p.id})" ${p.stock <= 0 ? 'disabled' : ''} class="min-h-10 rounded bg-amazon-yellow px-3 text-[11px] font-black text-amazon-navy hover:bg-amazon-orange disabled:cursor-not-allowed disabled:opacity-50"><i class="fa-solid fa-cart-plus ml-1"></i>السلة</button>
+                    </div>
+                </article>
+            `;
+        }
 
-            lane.innerHTML = deals.map(p => `
-                <div onclick="openProductModal(${p.id})" class="relative min-w-[200px] max-w-[200px] bg-white border rounded-lg p-3 cursor-pointer hover:shadow-md transition">
-                    <div class="absolute left-2 top-2 z-10">${renderWishlistButton(p.id, 'h-8 w-8')}</div>
-                    <img src="${escapeHtml(p.img)}" alt="${escapeHtml(p.name)}" class="w-full h-28 object-contain mb-2">
-                    <span class="bg-amazon-redDeal text-white font-extrabold text-[9px] px-1.5 py-0.5 rounded">صفقة خاطفة</span>
-                    <h4 class="font-bold text-xs text-amazon-navy line-clamp-1 mt-1">${escapeHtml(p.name)}</h4>
-                    ${renderProductPrice(p, 'text-sm')}
-                    <div class="mt-2">${renderPriceAlertButton(p.id, true)}</div>
-                </div>
-            `).join('');
+        function renderHorizontalDeals() {
+            const laptopLane = document.getElementById('laptopDealsLane');
+            const mobileLane = document.getElementById('mobileDealsLane');
+            const legacyLane = document.getElementById('horizontalDealsLane');
+            const laptopDeals = productsData.filter(product => ['laptops', 'monitors', 'gaming'].includes(product.category)).slice(0, 12);
+            const mobileDeals = productsData.filter(product => ['phones', 'audio', 'cameras', 'cables', 'smarthome'].includes(product.category)).slice(0, 12);
+            if (laptopLane) laptopLane.innerHTML = laptopDeals.map(product => getDealCard(product, 25 + (product.id % 26))).join('');
+            if (mobileLane) mobileLane.innerHTML = mobileDeals.map(product => getDealCard(product, 20 + (product.id % 21))).join('');
+            if (legacyLane) legacyLane.innerHTML = '';
+        }
+
+        function scrollDealLane(laneId, direction) {
+            const lane = document.getElementById(laneId);
+            if (!lane) return;
+            const card = lane.querySelector('.deal-product-card');
+            const distance = card ? card.getBoundingClientRect().width + 16 : 240;
+            lane.scrollBy({ left: direction * distance * -1, behavior: 'smooth' });
         }
 
         // اقتراح منتجات مكملة أو من الفئة نفسها انطلاقاً من السلة وآخر قسم تمت مشاهدته.
@@ -3181,25 +3665,65 @@
                             <p class="text-xs text-gray-600 mb-3">متوسط التقييم: <strong id="productReviewAverage">${summary.rating}</strong> من 5 — ${summary.count} تقييم</p>
                             <div class="space-y-2 max-h-72 overflow-y-auto">${reviewList}</div>
                         </div>
-                        <form onsubmit="submitProductReview(event, ${productId})" class="space-y-3 bg-amber-50 border border-amber-100 rounded-lg p-4">
-                            <h4 class="font-bold text-amazon-navy">${existingReview ? 'تعديل تقييمك' : 'أضف تقييمك'}</h4>
+                        <form id="productReviewForm" onsubmit="submitProductReview(event, ${productId})" class="space-y-3 rounded-lg border border-white/10 bg-[#101820] p-4 text-white shadow-xl">
+                            <h4 class="font-black text-amazon-yellow">${existingReview ? 'تعديل تقييمك' : 'أضف تقييمك'}</h4>
                             ${activeUser ? `
-                                <label class="block text-xs font-bold text-gray-700" for="productReviewRating">التقييم من نجمة إلى 5 نجوم</label>
-                                <select id="productReviewRating" required class="w-full p-2 border rounded bg-white">
-                                    ${[5, 4, 3, 2, 1].map(rating => `<option value="${rating}" ${existingReview && existingReview.rating === rating ? 'selected' : ''}>${rating} من 5 نجوم</option>`).join('')}
-                                </select>
-                                <label class="block text-xs font-bold text-gray-700" for="productReviewComment">مراجعتك</label>
-                                <textarea id="productReviewComment" required minlength="3" maxlength="1000" rows="4" class="w-full p-2 border rounded resize-y" placeholder="شارك تجربتك مع المنتج">${existingReview ? escapeHtml(existingReview.comment) : ''}</textarea>
-                                <button type="submit" class="w-full bg-amazon-navy hover:bg-amazon-lightNavy text-white font-bold py-2 rounded">حفظ التقييم</button>
-                            ` : '<p class="text-xs text-gray-600">سجّل الدخول أو أنشئ حساباً لإضافة تقييم ومراجعة.</p>'}
+                                <fieldset class="space-y-2">
+                                    <legend class="text-xs font-bold text-gray-200">اختر تقييمك</legend>
+                                    <input id="productReviewRating" name="rating" type="hidden" value="${existingReview?.rating || 0}">
+                                    <div id="productReviewStars" class="flex flex-row-reverse justify-end gap-1" role="radiogroup" aria-label="اختيار التقييم من 1 إلى 5 نجوم">
+                                        ${[1, 2, 3, 4, 5].map(rating => `<button type="button" class="review-star flex h-11 w-11 items-center justify-center rounded-lg text-xl text-gray-500 transition hover:scale-110" data-rating="${rating}" role="radio" aria-checked="${existingReview?.rating === rating ? 'true' : 'false'}" aria-label="${rating} نجوم"><i class="${existingReview && existingReview.rating >= rating ? 'fa-solid' : 'fa-regular'} fa-star"></i></button>`).join('')}
+                                    </div>
+                                    <p id="productReviewRatingError" class="min-h-4 text-[11px] text-red-300" aria-live="polite"></p>
+                                </fieldset>
+                                <label class="block text-xs font-bold text-gray-200" for="productReviewName">اسم المراجع</label>
+                                <input id="productReviewName" required maxlength="100" value="${escapeHtml(activeUser.name || '')}" class="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-amazon-yellow focus:ring-2 focus:ring-amazon-yellow/20" placeholder="اسمك الظاهر مع المراجعة">
+                                <label class="block text-xs font-bold text-gray-200" for="productReviewComment">مراجعتك</label>
+                                <textarea id="productReviewComment" required minlength="3" maxlength="1000" rows="4" class="w-full resize-y rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-amazon-yellow focus:ring-2 focus:ring-amazon-yellow/20" placeholder="شارك تجربتك مع المنتج">${existingReview ? escapeHtml(existingReview.comment) : ''}</textarea>
+                                <p id="productReviewCommentError" class="min-h-4 text-[11px] text-red-300" aria-live="polite"></p>
+                                <button type="submit" class="min-h-11 w-full rounded-lg bg-amazon-yellow font-black text-amazon-navy transition hover:bg-amazon-orange active:scale-[.99]">حفظ التقييم</button>
+                            ` : '<p class="text-xs text-gray-300">سجّل الدخول أو أنشئ حساباً لإضافة تقييم ومراجعة.</p><button type="button" onclick="openAuthModal(); closeProductModal();" class="min-h-11 w-full rounded-lg border border-amazon-yellow text-amazon-yellow hover:bg-amazon-yellow hover:text-amazon-navy">تسجيل الدخول</button>'}
                         </form>
                     </div>
                 `;
                 const summaryElement = document.getElementById('productReviewSummary');
                 if (summaryElement) summaryElement.textContent = `${summary.rating} (${summary.count} تقييم)`;
+                initInteractiveReviewStars(existingReview?.rating || 0);
             } catch (error) {
                 showToast('تعذر عرض مراجعات هذا المنتج.', 'navy');
             }
+        }
+
+        function initInteractiveReviewStars(initialRating = 0) {
+            const input = document.getElementById('productReviewRating');
+            const starsContainer = document.getElementById('productReviewStars');
+            if (!input || !starsContainer) return;
+
+            const paintStars = rating => {
+                starsContainer.querySelectorAll('.review-star').forEach(button => {
+                    const buttonRating = Number(button.dataset.rating);
+                    const selected = buttonRating <= rating;
+                    button.classList.toggle('text-amazon-yellow', selected);
+                    button.classList.toggle('text-gray-500', !selected);
+                    button.setAttribute('aria-checked', String(buttonRating === rating));
+                    button.querySelector('i')?.classList.toggle('fa-solid', selected);
+                    button.querySelector('i')?.classList.toggle('fa-regular', !selected);
+                });
+            };
+
+            starsContainer.querySelectorAll('.review-star').forEach(button => {
+                const rating = Number(button.dataset.rating);
+                button.addEventListener('mouseenter', () => paintStars(rating));
+                button.addEventListener('focus', () => paintStars(rating));
+                button.addEventListener('click', () => {
+                    input.value = String(rating);
+                    paintStars(rating);
+                    const ratingError = document.getElementById('productReviewRatingError');
+                    if (ratingError) ratingError.textContent = '';
+                });
+            });
+            starsContainer.addEventListener('mouseleave', () => paintStars(Number(input.value) || initialRating));
+            paintStars(Number(input.value) || initialRating);
         }
 
         // حفظ تقييم واحد لكل مستخدم ومنتج مع إتاحة تعديله لاحقاً.
@@ -3208,13 +3732,26 @@
             try {
                 if (!activeUser || !activeUserId) {
                     showToast('سجّل الدخول قبل إضافة تقييم للمنتج.', 'navy');
+                    document.getElementById('productReviewForm')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     return;
                 }
                 const product = productsData.find(item => item.id === productId);
-                const rating = Number(document.getElementById('productReviewRating').value);
-                const comment = document.getElementById('productReviewComment').value.trim();
-                if (!product || !Number.isInteger(rating) || rating < 1 || rating > 5 || comment.length < 3 || comment.length > 1000) {
-                    showToast('اختر تقييماً من نجمة إلى 5 نجوم واكتب مراجعة من 3 إلى 1000 حرف.', 'navy');
+                const rating = Number(document.getElementById('productReviewRating')?.value || 0);
+                const name = document.getElementById('productReviewName')?.value.trim() || '';
+                const comment = document.getElementById('productReviewComment')?.value.trim() || '';
+                const ratingError = document.getElementById('productReviewRatingError');
+                const commentError = document.getElementById('productReviewCommentError');
+                let invalid = false;
+                if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+                    if (ratingError) ratingError.textContent = 'اختر تقييمًا من نجمة واحدة إلى 5 نجوم.';
+                    invalid = true;
+                } else if (ratingError) ratingError.textContent = '';
+                if (!name || comment.length < 3 || comment.length > 1000) {
+                    if (commentError) commentError.textContent = comment.length < 3 ? 'اكتب مراجعة لا تقل عن 3 أحرف.' : 'المراجعة طويلة جدًا.';
+                    invalid = true;
+                } else if (commentError) commentError.textContent = '';
+                if (!product || invalid) {
+                    if (!product) showToast('تعذر العثور على المنتج.', 'navy');
                     return;
                 }
 
@@ -3224,7 +3761,7 @@
                     id: `${activeUserId}-${productId}`,
                     productId,
                     userId: activeUserId,
-                    customerName: activeUser.name,
+                    customerName: name,
                     rating,
                     comment,
                     createdAt: new Date().toISOString()
@@ -3237,6 +3774,8 @@
                 productReviewsById = nextReviews;
                 renderProductReviews(productId);
                 filterProducts();
+                renderRecommendations();
+                renderPaginatedGrid();
                 showToast(existingIndex >= 0 ? 'تم تحديث تقييمك للمنتج.' : 'شكراً لمشاركة تقييمك للمنتج.');
             } catch (error) {
                 showToast('تعذر حفظ تقييمك. تحقق من مساحة التخزين وحاول مرة أخرى.', 'navy');
@@ -6191,6 +6730,7 @@ function escapeHtml(text) {
                 await signOut(firebaseAuth);
                 closeAuthModal();
                 syncMobileAuthControls();
+                syncLoginPromotionVisibility();
             } catch (error) {
                 console.error('Firebase sign-out failed:', error);
                 setAuthMessage('تعذر تسجيل الخروج حالياً. حاول مرة أخرى.');
