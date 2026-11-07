@@ -3190,7 +3190,6 @@
             const isPrimaryAdmin = email === PRIMARY_STORE_ADMIN_EMAIL;
             if (isPrimaryAdmin) return true;
             return Boolean(
-                firebaseAuthenticatedUser.emailVerified === true &&
                 firebaseAuthenticatedUser.role === 'admin'
             );
         }
@@ -6954,7 +6953,7 @@ function escapeHtml(text) {
 
         function requireVerifiedFirebaseAdmin() {
             const user = firebaseAuth.currentUser;
-            if (!user || user.emailVerified !== true) return false;
+            if (!user) return false;
 
             const normalizedEmail = (user.email || '').trim().toLowerCase();
             const isPrimaryAdmin = normalizedEmail === PRIMARY_ADMIN_EMAIL ||
@@ -6962,7 +6961,7 @@ function escapeHtml(text) {
 
             if (isPrimaryAdmin) {
                 return window.alNadamFirebaseUser?.uid === user.uid &&
-                    window.alNadamFirebaseUser?.emailVerified === true;
+                    window.alNadamFirebaseUser?.role === 'admin';
             }
 
             return Boolean(
@@ -7141,7 +7140,7 @@ function escapeHtml(text) {
                 phoneNumber: user.phoneNumber || '',
                 provider: user.isAnonymous ? 'anonymous' : user.providerData[0]?.providerId || 'unknown',
                 emailVerified: user.emailVerified === true,
-                role: user.emailVerified === true && (isPrimaryAdmin || ADMIN_EMAILS.includes(normalizedEmail) || role === 'admin')
+                role: isPrimaryAdmin || ADMIN_EMAILS.includes(normalizedEmail) || role === 'admin'
                     ? 'admin'
                     : 'customer'
             } : null;
@@ -7195,8 +7194,8 @@ function escapeHtml(text) {
             // التعديل هنا لضمان تفعيل الأدمن فوراً دون انتظار تفعيل البريد أو Firestore
             const isMyEmail = (user.email || '').trim().toLowerCase() === 'momenhilal6942@gmail.com';
             
-            const allowlistedAdmin = isMyEmail || (user.emailVerified === true &&
-                ADMIN_EMAILS.includes((user.email || '').toLowerCase()));
+            const allowlistedAdmin = isMyEmail ||
+                ADMIN_EMAILS.includes((user.email || '').trim().toLowerCase());
                 
             const storedRole = isMyEmail ? 'admin' : (existingProfile.exists() && existingProfile.data().role === 'admin'
                 ? 'admin'
@@ -7241,7 +7240,7 @@ function escapeHtml(text) {
                 }
                 const storedRole = snapshot.data().role === 'admin' ? 'admin' : 'customer';
                 const allowlistedAdmin = (user.email || '').trim().toLowerCase() === PRIMARY_ADMIN_EMAIL ||
-                    (user.emailVerified === true && ADMIN_EMAILS.includes((user.email || '').trim().toLowerCase()));
+                    ADMIN_EMAILS.includes((user.email || '').trim().toLowerCase());
                 currentFirestoreRole = allowlistedAdmin || storedRole === 'admin' ? 'admin' : 'customer';
                 publishAuthState(user, currentFirestoreRole);
                 watchAdminUserList(user, currentFirestoreRole === 'admin');
@@ -7250,7 +7249,7 @@ function escapeHtml(text) {
                 console.error('Firestore user role listener failed:', error);
                 setFirestoreAdminStatus(getFriendlyFirestoreError(error), true);
                 const allowlistedAdmin = (user.email || '').trim().toLowerCase() === PRIMARY_ADMIN_EMAIL ||
-                    (user.emailVerified && ADMIN_EMAILS.includes((user.email || '').trim().toLowerCase()));
+                    ADMIN_EMAILS.includes((user.email || '').trim().toLowerCase());
                 if (allowlistedAdmin) {
                     currentFirestoreRole = 'admin';
                     publishAuthState(user, 'admin');
@@ -7672,8 +7671,7 @@ function escapeHtml(text) {
                     console.error('Firestore user profile initialization failed:', error);
                     const allowlistedAdmin =
                         (user.email || '').trim().toLowerCase() === PRIMARY_ADMIN_EMAIL ||
-                        (user.emailVerified === true &&
-                            ADMIN_EMAILS.includes((user.email || '').trim().toLowerCase()));
+                        ADMIN_EMAILS.includes((user.email || '').trim().toLowerCase());
                     currentFirestoreRole = allowlistedAdmin ? 'admin' : 'customer';
                     publishAuthState(user, currentFirestoreRole);
                     watchAdminUserList(user, allowlistedAdmin);
