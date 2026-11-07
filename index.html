@@ -4618,7 +4618,7 @@
                         <option value="customer" ${user.role !== 'admin' ? 'selected' : ''}>عميل</option>
                         <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>مدير</option>
                     </select></td>
-                    <td class="p-2"><button type="button" onclick="removeFirestoreUser('${escapeHtml(user.uid)}')" ${isCurrentUser || isAdminUser ? 'disabled title="اخفض دور المدير إلى عميل أولاً"' : ''} class="rounded bg-red-700 px-2 py-1 font-bold text-white disabled:cursor-not-allowed disabled:opacity-40">إزالة السجل</button></td>
+                    <td class="p-2"><button type="button" onclick="deleteUserPermanently('${escapeHtml(user.uid)}')" ${isCurrentUser || isProtectedAdmin ? 'disabled' : ''} class="rounded bg-red-700 px-2 py-1 font-bold text-white disabled:cursor-not-allowed disabled:opacity-40">حذف نهائي</button></td>
                 </tr>`;
             }).join('') || '<tr><td colspan="4" class="p-3 text-center text-gray-500">لا توجد حسابات في Firestore حتى الآن.</td></tr>';
         }
@@ -4648,8 +4648,8 @@
             }
         }
 
-        // إزالة سجل المستخدم من Firestore
-        async function removeFirestoreUser(uid) {
+        // حذف المستخدم نهائياً من Firebase Authentication ومن Firestore.
+        async function deleteUserPermanently(uid) {
             if (!isStoreAdmin()) {
                 showToast('تتطلب هذه العملية حساب مدير معتمد.', 'error');
                 return;
@@ -4663,17 +4663,23 @@
                 showToast('لا يمكن إزالة حساب الإدارة الأساسي.', 'error');
                 return;
             }
-            if (!window.confirm(`إزالة سجل المستخدم من قاعدة بيانات المتجر؟`)) return;
+            if (!window.confirm('هل أنت متأكد من رغبتك في حذف المستخدم نهائياً؟')) return;
             try {
-                if (typeof window.removeFirestoreUser === 'function') {
-                    await window.removeFirestoreUser(uid);
-                } else {
-                    throw new Error('تعذر تهيئة وظيفة إزالة المستخدمين. أعد تحميل الصفحة.');
-                }
-                showToast('تمت إزالة سجل المستخدم من Firestore.');
+                if (typeof window.getStoreIdToken !== 'function') throw new Error('تعذر تهيئة جلسة Firebase.');
+                const idToken = await window.getStoreIdToken();
+                if (!idToken) throw new Error('يرجى تسجيل الدخول مرة أخرى.');
+                const response = await fetch(`/api/admin/users/${encodeURIComponent(uid)}`, {
+                    method: 'DELETE',
+                    headers: { Authorization: `Bearer ${idToken}` }
+                });
+                const result = await response.json().catch(() => ({}));
+                if (!response.ok) throw new Error(result.error || 'تعذر حذف المستخدم.');
+                firestoreUsers = firestoreUsers.filter(user => user.uid !== uid);
+                renderAdminUsers();
+                showToast('تم حذف المستخدم نهائياً.');
             } catch (error) {
-                console.error('Firestore user deletion failed:', error);
-                showToast(error.message || 'تعذر إزالة المستخدم من Firestore.', 'error');
+                console.error('Complete user deletion failed:', error);
+                showToast(error.message || 'تعذر حذف المستخدم نهائياً.', 'error');
             }
         }
 
@@ -7775,6 +7781,12 @@ function escapeHtml(text) {
         window.writeProductRating = writeProductRating;
         window.subscribeProductRatings = subscribeProductRatings;
         window.deleteProductRating = deleteProductRating;
+        window.getStoreIdToken = async () => {
+            await ensureAuthReady();
+            return firebaseAuth.currentUser
+                ? firebaseAuth.currentUser.getIdToken()
+                : null;
+        };
         document.addEventListener('DOMContentLoaded', () => {
             const authModal = document.getElementById('authModal');
             authModal?.addEventListener('click', event => {

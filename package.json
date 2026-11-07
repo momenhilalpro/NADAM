@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "node server.js"
   },
   "devDependencies": {
     "autoprefixer": "^10.6.2",
@@ -15,6 +16,8 @@
     "vite": "^7.2.2"
   },
   "dependencies": {
-    "firebase": "^13.2.0"
+    "firebase": "^13.2.0",
+    "firebase-admin": "^13.6.0",
+    "express": "^5.1.0"
   }
 }
