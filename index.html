@@ -1651,7 +1651,7 @@
                 <div class="overflow-x-auto">
                     <table class="w-full min-w-[720px] text-right text-xs">
                         <thead class="bg-gray-100 text-gray-700">
-                            <tr><th class="p-2">رقم الطلب</th><th class="p-2">العميل</th><th class="p-2">التاريخ</th><th class="p-2">الإجمالي</th><th class="p-2">الحالة / الإرجاع</th><th class="p-2">الإجراء</th></tr>
+                            <tr><th class="p-2">رقم الطلب</th><th class="p-2">العميل</th><th class="p-2">المنتج</th><th class="p-2">التاريخ</th><th class="p-2">الإجمالي</th><th class="p-2">الحالة / الإرجاع</th><th class="p-2">الإجراء</th></tr>
                         </thead>
                         <tbody id="adminOrderRows" class="divide-y"></tbody>
                     </table>
@@ -2465,6 +2465,7 @@
         let persistedOrders = [];
         let productReviewsById = {};
         let productRatingsUnsubscribe = null;
+        let firestoreOrders = [];
         let currentProductModalId = null;
         let currentInvoiceOrder = null;
         let activeCategory = 'all';
@@ -4765,6 +4766,12 @@
         window.addEventListener('alnadam:firestore-products', event => applyFirestoreProducts(event.detail));
         window.addEventListener('alnadam:firestore-categories', event => applyFirestoreCategories(event.detail));
         window.addEventListener('alnadam:firestore-users', event => applyFirestoreUsers(event.detail));
+        window.addEventListener('alnadam:firestore-orders', event => {
+            firestoreOrders = Array.isArray(event.detail) ? event.detail : [];
+            renderAdminOrders();
+            renderAdminMetrics();
+            renderAdminCharts();
+        });
         window.getStoreCatalogForFirestore = () => productsData.map(product => ({ ...product }));
 
         function openAdminProductModal() {
@@ -4829,34 +4836,51 @@
             if (!isStoreAdmin()) return;
             const rows = document.getElementById('adminOrderRows');
             if (!rows) return;
-            const allOrders = Object.values(usersById).flatMap(user =>
-                (Array.isArray(user.orders) ? user.orders : []).map(order => ({
+            const allOrders = firestoreOrders.length
+                ? firestoreOrders.map(order => ({
                     ...order,
-                    customerName: order.customerName || user.name,
-                    userId: user.id
+                    id: order.orderId || order.id,
+                    customerName: order.customer?.name || order.customerName || '',
+                    total: order.totalPrice || order.total || 0,
+                    timestamp: order.createdAt?.toDate
+                        ? order.createdAt.toDate().toISOString()
+                        : (order.createdAt || order.timestamp || '')
                 }))
-            ).sort((first, second) =>
-                new Date(second.timestamp || second.date).getTime() - new Date(first.timestamp || first.date).getTime()
+                : Object.values(usersById).flatMap(user =>
+                    (Array.isArray(user.orders) ? user.orders : []).map(order => ({
+                        ...order,
+                        customerName: order.customerName || user.name,
+                        userId: user.id
+                    }))
+                );
+            allOrders.sort((first, second) =>
+                new Date(second.timestamp || second.createdAt || second.date || 0).getTime() -
+                new Date(first.timestamp || first.createdAt || first.date || 0).getTime()
             );
             const search = (document.getElementById('adminOrderSearch')?.value || '').trim().toLocaleLowerCase();
             const statusFilter = document.getElementById('adminOrderStatusFilter')?.value || 'all';
             const filteredOrders = allOrders.filter(order => {
-                const status = isOrderCompleted(order) ? 'completed' : isOrderCancelled(order) ? 'cancelled' : 'processing';
+                const status = order.status === 'pending' ? 'processing'
+                    : order.status === 'completed' ? 'completed'
+                    : isOrderCompleted(order) ? 'completed' : isOrderCancelled(order) ? 'cancelled' : 'processing';
                 const matchesStatus = statusFilter === 'all' || status === statusFilter;
-                const matchesSearch = `${order.id || ''} ${order.customerName || ''}`.toLocaleLowerCase().includes(search);
+                const matchesSearch = `${order.id || ''} ${order.customerName || ''} ${order.productName || ''}`.toLocaleLowerCase().includes(search);
                 return matchesStatus && matchesSearch;
             });
             if (!filteredOrders.length) {
-                rows.innerHTML = '<tr><td colspan="6" class="p-5 text-center text-gray-500">لا توجد طلبات محفوظة حالياً.</td></tr>';
+                rows.innerHTML = '<tr><td colspan="7" class="p-5 text-center text-gray-500">لا توجد طلبات محفوظة حالياً.</td></tr>';
                 return;
             }
             rows.innerHTML = filteredOrders.map(order => {
-                const status = isOrderCompleted(order) ? 'completed' :
+                const status = order.status === 'pending' ? 'processing'
+                    : order.status === 'completed' ? 'completed'
+                    : isOrderCompleted(order) ? 'completed' :
                     isOrderCancelled(order) ? 'cancelled' : 'processing';
                 return `<tr>
                     <td class="p-2 font-bold" dir="ltr">${escapeHtml(order.id)}</td>
                     <td class="p-2">${escapeHtml(order.customerName)}</td>
-                    <td class="p-2">${escapeHtml(order.date || '')}</td>
+                    <td class="p-2">${escapeHtml(order.productName || '—')}<span class="block text-[10px] text-gray-500">الكمية: ${escapeHtml(String(order.quantity ?? 1))}</span></td>
+                    <td class="p-2">${escapeHtml(order.date || (order.timestamp ? String(order.timestamp).slice(0, 10) : ''))}</td>
                     <td class="p-2 font-bold">${formatMoney(order.total || 0)}${order.refundAmount ? `<span class="block text-[10px] text-green-700">مسترد ${formatMoney(order.refundAmount)}</span>` : ''}</td>
                     <td class="p-2">${escapeHtml(order.status || 'قيد المعالجة')}${order.returnRequest ? `<span class="block text-[10px] text-purple-700">طلب الإرجاع: ${escapeHtml(order.returnRequest.status === 'requested' ? 'بانتظار الموافقة' : order.returnRequest.status === 'approved' ? 'تمت الموافقة' : 'مرفوض')}</span>` : ''}</td>
                     <td class="p-2">
@@ -5610,7 +5634,7 @@
         }
 
         // التحقق من الطلب، تطبيق الخصم والنقاط، ثم حفظه محلياً قبل إرساله للواتساب.
-        function processOrder(e) {
+        async function processOrder(e) {
             e.preventDefault();
             try {
                 if (!activeUser || !activeUserId) {
@@ -5706,6 +5730,16 @@
                         lineTotal: getEffectiveProductPrice(item.id) * item.qty
                     }))
                 };
+                if (typeof window.createFirestoreOrders !== 'function') {
+                    throw new Error('خدمة حفظ الطلبات غير جاهزة.');
+                }
+                await window.createFirestoreOrders({
+                    orderId: order.id,
+                    customer: { name, phone, address, email: activeUser?.email || '' },
+                    paymentMethod: paymentTitle,
+                    totalPrice: finalTotal,
+                    lineItems: order.lineItems
+                });
                 const nextPersistedOrders = [order, ...persistedOrders];
                 const previousCatalog = [...productsData];
                 const nextCatalog = productsData.map(product => {
@@ -6887,6 +6921,7 @@ function escapeHtml(text) {
         const categoriesCollection = collection(firestore, 'categories');
         const usersCollection = collection(firestore, 'users');
         const ratingsCollection = collection(firestore, 'ratings');
+        const ordersCollection = collection(firestore, 'orders');
         const productCounterRef = doc(firestore, 'meta', 'productCatalog');
         let authMode = 'login';
         let phoneConfirmation = null;
@@ -6897,6 +6932,7 @@ function escapeHtml(text) {
         let authStateRevision = 0;
         let roleUnsubscribe = null;
         let adminUsersUnsubscribe = null;
+        let adminOrdersUnsubscribe = null;
         let productsUnsubscribe = null;
         let categoriesUnsubscribe = null;
         let adminDataUid = '';
@@ -7263,6 +7299,7 @@ function escapeHtml(text) {
 
         // تشغيل أو إيقاف قائمة المستخدمين الحية حسب دور Firebase الحالي.
         function watchAdminUserList(user, isAdmin) {
+            watchFirestoreOrders(isAdmin);
             if (adminDataUid === user.uid && ((isAdmin && adminUsersUnsubscribe) || (!isAdmin && !adminUsersUnsubscribe))) return;
             if (adminUsersUnsubscribe) adminUsersUnsubscribe();
             adminUsersUnsubscribe = null;
@@ -7666,6 +7703,95 @@ function escapeHtml(text) {
             });
         }
 
+        async function createFirestoreOrders(orderData) {
+            await ensureAuthReady();
+            if (!firebaseAuth.currentUser) throw new Error('يجب تسجيل الدخول لإتمام الطلب.');
+            const userId = firebaseAuth.currentUser.uid;
+            const userRef = doc(usersCollection, userId);
+            const userSnapshot = await getDoc(userRef);
+            const customer = {
+                name: String(orderData.customer?.name || userSnapshot.data()?.displayName || '').trim(),
+                email: String(orderData.customer?.email || firebaseAuth.currentUser.email || '').trim(),
+                phone: String(orderData.customer?.phone || userSnapshot.data()?.phone || '').trim(),
+                address: String(orderData.customer?.address || '').trim()
+            };
+            if (!customer.name || !customer.phone || !customer.address) {
+                throw new Error('بيانات العميل المطلوبة لإنشاء الطلب غير مكتملة.');
+            }
+
+            const lineItems = Array.isArray(orderData.lineItems) ? orderData.lineItems : [];
+            if (!lineItems.length) throw new Error('لا توجد منتجات في الطلب.');
+            for (let index = 0; index < lineItems.length; index += 1) {
+                const item = lineItems[index];
+                const productId = Number(item.productId);
+                if (!Number.isSafeInteger(productId) || productId <= 0) throw new Error('معرّف المنتج غير صالح.');
+
+                let productRef = doc(productsCollection, String(productId));
+                let productSnapshot = await getDoc(productRef);
+                if (!productSnapshot.exists()) {
+                    const matchingProducts = await getDocs(
+                        query(productsCollection, where('id', '==', productId), limit(1))
+                    );
+                    if (!matchingProducts.empty) {
+                        productSnapshot = matchingProducts.docs[0];
+                        productRef = productSnapshot.ref;
+                    }
+                }
+                let productName = String(item.name || '').trim();
+                let unitPrice = Number(item.unitPrice) || 0;
+                if (productSnapshot.exists()) {
+                    const productData = productSnapshot.data();
+                    productName = String(productData.name || productName).trim();
+                    unitPrice = Number(productData.price) || unitPrice;
+                }
+
+                const quantity = Number(item.quantity);
+                if (!Number.isInteger(quantity) || quantity < 1) throw new Error('كمية المنتج غير صالحة.');
+                const totalPrice = Math.round(unitPrice * quantity * 100) / 100;
+                const orderDocumentRef = doc(ordersCollection, `${orderData.orderId}_${index + 1}`);
+                await setDoc(orderDocumentRef, {
+                    orderId: String(orderData.orderId),
+                    userId,
+                    userRef,
+                    productId,
+                    productRef,
+                    customer,
+                    customerName: customer.name,
+                    productName,
+                    unitPrice,
+                    quantity,
+                    totalPrice,
+                    paymentMethod: String(orderData.paymentMethod || ''),
+                    status: 'pending',
+                    createdAt: serverTimestamp()
+                });
+            }
+        }
+
+        function watchFirestoreOrders(isAdmin) {
+            if (!isAdmin) {
+                if (adminOrdersUnsubscribe) adminOrdersUnsubscribe();
+                adminOrdersUnsubscribe = null;
+                window.dispatchEvent(new CustomEvent('alnadam:firestore-orders', { detail: [] }));
+                return;
+            }
+            if (adminOrdersUnsubscribe) return;
+            adminOrdersUnsubscribe = onSnapshot(ordersCollection, snapshot => {
+                const orders = snapshot.docs.map(orderDoc => ({
+                    id: orderDoc.id,
+                    ...orderDoc.data()
+                })).sort((first, second) => {
+                    const firstTime = first.createdAt?.toMillis?.() || new Date(first.createdAt || 0).getTime();
+                    const secondTime = second.createdAt?.toMillis?.() || new Date(second.createdAt || 0).getTime();
+                    return secondTime - firstTime;
+                });
+                window.dispatchEvent(new CustomEvent('alnadam:firestore-orders', { detail: orders }));
+            }, error => {
+                console.error('Firestore orders listener failed:', error);
+                showToast?.('تعذر تحميل الطلبات مباشرة من Firestore.', 'error');
+            });
+        }
+
         // بدء المستمعين العامين للكتالوج والأقسام مرة واحدة عند تحميل الوحدة.
         function initializeFirestoreCatalog() {
             subscribeToFirestoreProducts();
@@ -7702,6 +7828,16 @@ function escapeHtml(text) {
             });
             if (!updated) throw new Error('الطلب غير موجود في سجل العميل.');
             await updateDoc(userRef, { orders: nextOrders, updatedAt: serverTimestamp() });
+            const firestoreOrderSnapshot = await getDocs(
+                query(ordersCollection, where('orderId', '==', orderId))
+            );
+            await Promise.all(firestoreOrderSnapshot.docs.map(orderDoc =>
+                updateDoc(orderDoc.ref, {
+                    status: statusKey === 'completed' ? 'completed' : 'pending',
+                    statusLabel: statusLabel,
+                    updatedAt: serverTimestamp()
+                })
+            ));
         }
 
         window.addFirestoreProduct = addFirestoreProduct;
@@ -7713,6 +7849,7 @@ function escapeHtml(text) {
         window.removeFirestoreUser = removeFirestoreUser;
         window.syncFirestoreUserOrders = syncFirestoreUserOrders;
         window.updateFirestoreOrderStatus = updateFirestoreOrderStatus;
+        window.createFirestoreOrders = createFirestoreOrders;
         initializeFirestoreCatalog();
 
         // تفعيل استمرارية الجلسة ومزامنة كل انتقالات حالة Firebase بعد تحميل المتجر.
