@@ -938,6 +938,10 @@
                         <option value="cables">شواحن ووصلات</option>
                     </select>
                     <input type="search" id="searchInput" oninput="filterProducts()" aria-label="ابحث في منتجات المتجر" placeholder="ابحث عن منتج أو علامة تجارية..." class="w-full min-w-0 px-3 py-2.5 text-sm text-gray-900 outline-none placeholder-gray-400">
+                    <button id="voiceSearchButton" type="button" onclick="startVoiceSearch()" aria-label="البحث بالصوت باللغة العربية" title="البحث بالصوت"
+                        class="ml-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-red-100 bg-white text-red-600 transition hover:border-red-200 hover:bg-red-50 active:scale-95">
+                        <i id="voiceSearchIcon" class="fa-solid fa-microphone text-base" aria-hidden="true"></i>
+                    </button>
                     <button type="button" onclick="filterProducts()" aria-label="بحث" class="mr-1 flex h-9 w-11 shrink-0 items-center justify-center rounded-full bg-amazon-orange text-amazon-navy transition-transform hover:bg-amazon-orangeHover active:scale-95 sm:w-12">
                         <i class="fa-solid fa-magnifying-glass text-base sm:text-lg" aria-hidden="true"></i>
                     </button>
@@ -1073,6 +1077,18 @@
                 </div>
                 <i class="fa-solid fa-microchip absolute -left-10 -bottom-10 text-9xl text-white opacity-10 hidden sm:block"></i>
             </div>
+
+            <!-- AI Product Recommendation Engine -->
+            <section id="aiRecommendationsSection" class="rounded-lg border border-amber-500/40 bg-slate-950 p-5 shadow-[0_0_30px_rgba(245,158,11,.08)] sm:p-6" dir="rtl">
+                <div class="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-4">
+                    <div>
+                        <span class="mb-2 inline-flex items-center gap-2 rounded-full bg-amber-500/10 px-3 py-1 text-[10px] font-black text-amber-400"><i class="fa-solid fa-sparkles"></i>مدعوم بـ Gemini AI</span>
+                        <h2 class="text-lg font-black text-white">منتجات مقترحة لك بواسطة الذكاء الاصطناعي</h2>
+                    </div>
+                    <button type="button" onclick="refreshAIRecommendations()" class="min-h-10 rounded-md border border-slate-700 px-3 text-xs font-bold text-slate-300 hover:border-amber-500/60 hover:text-amber-400"><i class="fa-solid fa-arrows-rotate ml-1"></i>تحديث الاقتراحات</button>
+                </div>
+                <div id="aiRecommendationsGrid" class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4"></div>
+            </section>
 
             <!-- Promotional Campaign Mosaic -->
             <section class="promo-grid-shell" aria-labelledby="promo-grid-title">
@@ -1412,6 +1428,87 @@
                 </form>
             </div>
 
+            <section class="overflow-hidden rounded-lg border border-slate-700 bg-slate-950 shadow-2xl">
+                <div class="border-b border-slate-800 px-5 py-4 sm:px-7">
+                    <div class="flex items-start gap-3">
+                        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-amber-500 text-slate-950">
+                            <i class="fa-solid fa-location-dot"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-black text-white">تتبع الطلب</h2>
+                            <p class="mt-1 text-xs text-slate-400">أدخل رقم الطلب لمتابعة حالته وتفاصيل منتجاته.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-5 sm:p-7">
+                    <form id="orderTrackingForm" onsubmit="trackOrderById(event)" class="flex flex-col gap-3 sm:flex-row">
+                        <label class="sr-only" for="orderTrackingInput">رقم الطلب</label>
+                        <input id="orderTrackingInput" type="text" maxlength="80" autocomplete="off" dir="ltr"
+                            placeholder="رقم الطلب، مثال: ORD-12345"
+                            class="min-h-12 flex-1 rounded-lg border border-slate-700 bg-slate-900 px-4 text-sm font-bold text-white placeholder:text-slate-500 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20">
+                        <button id="orderTrackingSubmit" type="submit"
+                            class="min-h-12 rounded-lg bg-amber-500 px-6 text-sm font-black text-slate-950 transition hover:bg-amber-400 disabled:cursor-wait disabled:opacity-60">
+                            <i class="fa-solid fa-magnifying-glass ml-2"></i>تتبع الطلب
+                        </button>
+                    </form>
+
+                    <p id="orderTrackingMessage" class="mt-3 min-h-5 text-sm font-bold text-slate-400" role="status" aria-live="polite"></p>
+
+                    <div id="orderTrackingResult" class="hidden mt-6 space-y-6" aria-live="polite">
+                        <div class="rounded-lg border border-slate-800 bg-slate-900/70 p-4 sm:p-5">
+                            <div class="grid grid-cols-2 gap-4 text-sm lg:grid-cols-4">
+                                <div>
+                                    <span class="block text-xs font-bold text-slate-500">رقم الطلب</span>
+                                    <strong id="trackedOrderId" class="mt-1 block text-amber-400" dir="ltr">—</strong>
+                                </div>
+                                <div>
+                                    <span class="block text-xs font-bold text-slate-500">اسم العميل</span>
+                                    <strong id="trackedCustomerName" class="mt-1 block text-white">—</strong>
+                                </div>
+                                <div>
+                                    <span class="block text-xs font-bold text-slate-500">تاريخ الطلب</span>
+                                    <strong id="trackedOrderDate" class="mt-1 block text-white">—</strong>
+                                </div>
+                                <div>
+                                    <span class="block text-xs font-bold text-slate-500">الإجمالي</span>
+                                    <strong id="trackedOrderTotal" class="mt-1 block text-white">—</strong>
+                                </div>
+                            </div>
+                            <div class="mt-4 border-t border-slate-800 pt-4">
+                                <span class="block text-xs font-bold text-slate-500">المنتجات</span>
+                                <div id="trackedProductsList" class="mt-2 space-y-2 text-sm text-slate-200"></div>
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto pb-2" dir="rtl">
+                            <div class="relative mx-auto min-w-[560px] max-w-3xl px-4 py-2">
+                                <div class="absolute right-[16.66%] left-[16.66%] top-6 h-1 rounded-full bg-slate-700" aria-hidden="true">
+                                    <div id="trackingProgressLine" class="h-full rounded-full bg-amber-500 transition-all duration-500" style="width: 0%"></div>
+                                </div>
+                                <ol class="relative grid grid-cols-3">
+                                    <li id="trackingStep0" class="flex min-w-0 flex-col items-center text-center">
+                                        <span class="tracking-step-circle relative z-10 flex h-12 w-12 items-center justify-center rounded-full border-2 border-slate-700 bg-slate-950 text-slate-500"><i class="fa-solid fa-box-open"></i></span>
+                                        <strong class="mt-3 text-sm text-slate-400">قيد المعالجة</strong>
+                                        <span class="mt-1 text-[11px] text-slate-500">تم استلام الطلب</span>
+                                    </li>
+                                    <li id="trackingStep1" class="flex min-w-0 flex-col items-center text-center">
+                                        <span class="tracking-step-circle relative z-10 flex h-12 w-12 items-center justify-center rounded-full border-2 border-slate-700 bg-slate-950 text-slate-500"><i class="fa-solid fa-truck-fast"></i></span>
+                                        <strong class="mt-3 text-sm text-slate-400">جاري التجهيز / الشحن</strong>
+                                        <span class="mt-1 text-[11px] text-slate-500">الطلب في طريقه إليك</span>
+                                    </li>
+                                    <li id="trackingStep2" class="flex min-w-0 flex-col items-center text-center">
+                                        <span class="tracking-step-circle relative z-10 flex h-12 w-12 items-center justify-center rounded-full border-2 border-slate-700 bg-slate-950 text-slate-500"><i class="fa-solid fa-circle-check"></i></span>
+                                        <strong class="mt-3 text-sm text-slate-400">مكتمل</strong>
+                                        <span class="mt-1 text-[11px] text-slate-500">تم تسليم الطلب</span>
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="bg-white p-5 rounded-lg shadow-sm border border-gray-200 flex items-center gap-4">
                     <div class="bg-amazon-yellow text-amazon-navy p-3.5 rounded-full text-2xl font-black shadow-inner">
@@ -1540,6 +1637,39 @@
                     <h2 class="mb-4 text-sm font-black text-amazon-navy">توزيع المنتجات حسب الأقسام</h2>
                     <div class="h-72"><canvas id="adminCategoryChart" aria-label="رسم توزيع الأقسام"></canvas></div>
                 </article>
+            </section>
+
+            <section class="overflow-hidden rounded-lg border border-slate-700 bg-slate-900/95 shadow-xl" dir="rtl">
+                <div class="flex flex-col gap-3 border-b border-slate-800 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <span class="mb-1 inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-1 text-[10px] font-black text-amber-400"><i class="fa-solid fa-shield-halved"></i>سجل مباشر</span>
+                        <h2 class="text-base font-black text-white">سجل الأنشطة والأمان</h2>
+                    </div>
+                    <div class="flex flex-col gap-2 sm:flex-row">
+                        <input id="auditLogSearch" type="search" oninput="renderAuditLogsTable()" placeholder="البحث بالبريد أو التفاصيل"
+                            class="min-h-10 rounded-md border border-slate-700 bg-slate-950 px-3 text-xs text-white placeholder:text-slate-500 focus:border-amber-400 focus:outline-none">
+                        <select id="auditLogActionFilter" onchange="renderAuditLogsTable()"
+                            class="min-h-10 rounded-md border border-slate-700 bg-slate-950 px-3 text-xs font-bold text-white focus:border-amber-400 focus:outline-none">
+                            <option value="all">كل أنواع الإجراءات</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full min-w-[760px] text-right text-xs">
+                        <thead class="bg-slate-950 text-amber-400">
+                            <tr>
+                                <th class="p-3 font-black">الوقت والتاريخ</th>
+                                <th class="p-3 font-black">المدير</th>
+                                <th class="p-3 font-black">الإجراء</th>
+                                <th class="p-3 font-black">التفاصيل</th>
+                                <th class="p-3 font-black">المصدر</th>
+                            </tr>
+                        </thead>
+                        <tbody id="auditLogsTableBody" class="divide-y divide-slate-800 text-slate-200">
+                            <tr><td colspan="5" class="p-5 text-center text-slate-500">جارٍ تحميل سجل الأنشطة...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </section>
 
             <div class="grid grid-cols-1 gap-6 xl:grid-cols-3">
@@ -1774,6 +1904,13 @@
                 </div>
 
                 <div id="cartItemsContainer" class="flex-grow p-4 overflow-y-auto space-y-4">
+                    <section id="cartAIRecommendations" class="mb-3 rounded-lg border border-amber-500/40 bg-slate-950 p-3 shadow-[0_0_24px_rgba(245,158,11,.08)]">
+                        <div class="mb-3 flex items-center justify-between gap-2">
+                            <h4 class="text-xs font-black text-white">منتجات مقترحة لك بواسطة الذكاء الاصطناعي</h4>
+                            <span class="rounded-full bg-amber-500/10 px-2 py-1 text-[9px] font-black text-amber-400">AI</span>
+                        </div>
+                        <div id="cartAIRecommendationsGrid" class="grid grid-cols-1 gap-2"></div>
+                    </section>
                     <!-- Cart Items injected dynamically -->
                 </div>
 
@@ -3469,6 +3606,44 @@
             lane.scrollBy({ left: direction * distance * -1, behavior: 'smooth' });
         }
 
+        window.auditLogs = [];
+
+        function renderAuditLogsTable() {
+            const body = document.getElementById('auditLogsTableBody');
+            const searchInput = document.getElementById('auditLogSearch');
+            const actionFilter = document.getElementById('auditLogActionFilter');
+            if (!body || !actionFilter) return;
+
+            const logs = Array.isArray(window.auditLogs) ? window.auditLogs : [];
+            const actionTypes = [...new Set(logs.map(log => String(log.actionType || '')).filter(Boolean))].sort();
+            const currentFilter = actionFilter.value || 'all';
+            actionFilter.innerHTML = '<option value="all">كل أنواع الإجراءات</option>' + actionTypes.map(type =>
+                `<option value="${escapeHtml(type)}" ${currentFilter === type ? 'selected' : ''}>${escapeHtml(type)}</option>`
+            ).join('');
+
+            const search = String(searchInput?.value || '').trim().toLocaleLowerCase('ar-EG');
+            const filtered = logs.filter(log => {
+                const matchesSearch = !search || `${log.adminEmail || ''} ${log.adminName || ''} ${log.details || ''} ${log.actionType || ''}`
+                    .toLocaleLowerCase('ar-EG').includes(search);
+                const matchesAction = currentFilter === 'all' || String(log.actionType || '') === currentFilter;
+                return matchesSearch && matchesAction;
+            });
+
+            body.innerHTML = filtered.length ? filtered.map(log => {
+                const date = log.timestamp?.toDate?.();
+                const source = log.ipAddress || log.userAgent || 'غير متاح';
+                return `<tr>
+                    <td class="whitespace-nowrap p-3 text-slate-400">${escapeHtml(date ? date.toLocaleString('ar-EG') : 'جارٍ التسجيل')}</td>
+                    <td class="p-3"><strong class="block text-white">${escapeHtml(log.adminName || 'مدير')}</strong><span class="mt-0.5 block text-[11px] text-slate-400" dir="ltr">${escapeHtml(log.adminEmail || '—')}</span></td>
+                    <td class="whitespace-nowrap p-3"><span class="rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 font-black text-amber-400">${escapeHtml(log.actionType || 'UNKNOWN')}</span></td>
+                    <td class="min-w-64 p-3 leading-6 text-slate-200">${escapeHtml(log.details || '—')}</td>
+                    <td class="max-w-48 p-3 text-[10px] leading-5 text-slate-500" title="${escapeHtml(source)}">${escapeHtml(source.length > 46 ? `${source.slice(0, 46)}…` : source)}</td>
+                </tr>`;
+            }).join('') : '<tr><td colspan="5" class="p-5 text-center text-slate-500">لا توجد سجلات مطابقة للفلاتر.</td></tr>';
+        }
+
+        window.renderAuditLogsTable = renderAuditLogsTable;
+
         // اقتراح منتجات مكملة أو من الفئة نفسها انطلاقاً من السلة وآخر قسم تمت مشاهدته.
         function renderRecommendations() {
             const grid = document.getElementById('recommendationsGrid');
@@ -3521,9 +3696,61 @@
                     </div>
                 </article>
             `).join('');
+            refreshAIRecommendations();
         }
 
         // تصفية المنتجات وتطبيق الترتيب وفق متوسط تقييم العملاء عند توفره.
+        function startVoiceSearch() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const input = document.getElementById('searchInput');
+            const button = document.getElementById('voiceSearchButton');
+            if (!SpeechRecognition) {
+                showToast('البحث الصوتي غير مدعوم في هذا المتصفح. استخدم Chrome أو Edge.', 'error');
+                return;
+            }
+            if (!input || !button) return;
+
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'ar-EG';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            button.classList.add('animate-pulse', 'bg-red-600', 'text-white', 'border-red-600');
+            button.classList.remove('bg-white', 'text-red-600', 'border-red-100');
+            document.getElementById('voiceSearchIcon')?.classList.add('animate-pulse');
+            showToast('تحدث الآن للبحث باللغة العربية...', 'info');
+
+            recognition.onresult = event => {
+                const transcript = event.results[0][0].transcript.trim();
+                input.value = transcript;
+                filterProducts();
+                navigateTo('catalog');
+                showToast(`تم البحث عن: ${transcript}`);
+            };
+            recognition.onerror = event => {
+                const message = event.error === 'not-allowed'
+                    ? 'يرجى السماح للموقع باستخدام الميكروفون ثم المحاولة مرة أخرى.'
+                    : event.error === 'no-speech'
+                        ? 'لم يتم سماع أي كلام. حاول مرة أخرى قريباً من الميكروفون.'
+                        : 'تعذر التعرف على الصوت. حاول مرة أخرى.';
+                showToast(message, 'error');
+            };
+            recognition.onend = () => {
+                button.classList.remove('animate-pulse', 'bg-red-600', 'text-white', 'border-red-600');
+                button.classList.add('bg-white', 'text-red-600', 'border-red-100');
+                document.getElementById('voiceSearchIcon')?.classList.remove('animate-pulse');
+            };
+
+            try {
+                recognition.start();
+            } catch (error) {
+                recognition.abort?.();
+                recognition.onend?.();
+                showToast('الميكروفون يعمل الآن بالفعل. انتظر لحظة ثم أعد المحاولة.', 'error');
+            }
+        }
+        window.startVoiceSearch = startVoiceSearch;
+
         function filterProducts() {
             const searchVal = document.getElementById('searchInput').value.trim().toLocaleLowerCase();
             const searchCatSelect = document.getElementById('searchCategorySelect').value;
@@ -5456,21 +5683,49 @@
             document.getElementById('freeShippingBar').style.width = pct + '%';
             document.getElementById('freeShippingText').textContent = `أضف منتجات بقيمة ${formatMoney(goal)} للشحن المجاني`;
 
-            if (cart.length === 0) {
-                container.innerHTML = `<p class="text-center py-10 text-gray-400 font-bold">عربة الشراء فارغة حالياً.</p>`;
-            } else {
-                container.innerHTML = cart.map(item => `
-                    <div class="flex items-center justify-between gap-3 border-b pb-3">
-                        <img src="${escapeHtml(item.img)}" alt="${escapeHtml(item.name)}" class="w-12 h-12 object-contain rounded border">
-                        <div class="flex-grow">
-                            <h4 class="font-bold text-xs text-amazon-navy line-clamp-1">${escapeHtml(item.name)}</h4>
-                            <span class="text-xs font-extrabold text-amazon-redDeal">${formatMoney(getEffectiveProductPrice(item.id) * item.qty)}</span>
-                        </div>
-                        <button onclick="moveToTrash(${item.id})" class="text-red-500 hover:text-red-700 text-sm">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </button>
+            const aiSection = `
+                <section class="rounded-lg border border-amber-500/40 bg-slate-950 p-3 shadow-[0_0_24px_rgba(245,158,11,.08)]" dir="rtl">
+                    <div class="mb-3 flex items-center justify-between gap-2">
+                        <h4 class="text-xs font-black text-white">منتجات مقترحة لك بواسطة الذكاء الاصطناعي</h4>
+                        <span class="rounded-full bg-amber-500/10 px-2 py-1 text-[9px] font-black text-amber-400">AI</span>
                     </div>
-                `).join('');
+                    <div id="cartAIRecommendationsGrid" class="grid grid-cols-1 gap-2"></div>
+                </section>`;
+
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div class="flex min-h-52 flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50 px-5 text-center">
+                        <span class="flex h-14 w-14 items-center justify-center rounded-full bg-amazon-navy text-amazon-yellow"><i class="fa-solid fa-basket-shopping text-xl"></i></span>
+                        <h4 class="mt-3 text-sm font-black text-amazon-navy">سلتك جاهزة للتسوق</h4>
+                        <p class="mt-1 text-xs text-gray-500">أضف أجهزة وإكسسوارات مفضلة لتظهر هنا.</p>
+                        <button type="button" onclick="toggleCartDrawer(); navigateTo('catalog')" class="mt-4 rounded-md bg-amazon-orange px-4 py-2 text-xs font-black text-amazon-navy">تصفح المنتجات</button>
+                    </div>${aiSection}`;
+            } else {
+                container.innerHTML = `${aiSection}<div class="space-y-2.5">${cart.map(item => {
+                    const stock = Number(item.stock ?? 1);
+                    const unitPrice = getEffectiveProductPrice(item.id);
+                    return `
+                    <article class="group grid grid-cols-[72px_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-slate-200 bg-white p-3 transition hover:border-amber-300 hover:shadow-sm">
+                        <button type="button" onclick="openProductModal(${item.id})" class="flex h-16 w-[72px] items-center justify-center rounded-md bg-slate-50">
+                            <img src="${escapeHtml(item.img)}" alt="${escapeHtml(item.name)}" class="h-full max-h-14 max-w-full object-contain">
+                        </button>
+                        <div class="min-w-0 text-right">
+                            <button type="button" onclick="openProductModal(${item.id})" class="line-clamp-2 text-xs font-black text-amazon-navy hover:text-amazon-blueLink">${escapeHtml(item.name)}</button>
+                            <span class="mt-1 block text-[11px] font-black text-amazon-redDeal">${formatMoney(unitPrice * item.qty)}</span>
+                            <span class="mt-0.5 block text-[9px] text-slate-400">${formatMoney(unitPrice)} للوحدة</span>
+                        </div>
+                        <div class="flex flex-col items-end gap-2">
+                            <button type="button" onclick="moveToTrash(${item.id})" class="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-red-50 hover:text-red-600" aria-label="إزالة ${escapeHtml(item.name)}">
+                                <i class="fa-solid fa-trash-can text-xs"></i>
+                            </button>
+                            <div class="flex h-8 items-center rounded-md border border-slate-300 bg-slate-50" dir="ltr">
+                                <button type="button" onclick="changeCartQuantity(${item.id}, -1)" class="flex h-full w-8 items-center justify-center text-slate-600 hover:bg-white" aria-label="تقليل الكمية"><i class="fa-solid fa-minus text-[9px]"></i></button>
+                                <span class="w-8 text-center text-xs font-black text-amazon-navy">${item.qty}</span>
+                                <button type="button" onclick="changeCartQuantity(${item.id}, 1)" ${item.qty >= stock ? 'disabled' : ''} class="flex h-full w-8 items-center justify-center text-slate-600 hover:bg-white disabled:cursor-not-allowed disabled:text-slate-300" aria-label="زيادة الكمية"><i class="fa-solid fa-plus text-[9px]"></i></button>
+                            </div>
+                        </div>
+                    </article>`;
+                }).join('')}</div>`;
             }
 
             document.getElementById('cartSubtotal').innerText = formatMoney(subtotal);
@@ -5488,6 +5743,25 @@
             if (forceOpen) drawer.classList.remove('hidden');
             else drawer.classList.toggle('hidden');
         }
+
+        function changeCartQuantity(id, change) {
+            const item = cart.find(entry => entry.id === id);
+            if (!item) return;
+            const nextQty = item.qty + change;
+            if (nextQty < 1) {
+                moveToTrash(id);
+                return;
+            }
+            const stock = Number(item.stock ?? 0);
+            if (stock > 0 && nextQty > stock) {
+                showToast('تم الوصول إلى الحد المتاح من المخزون لهذا المنتج.', 'warning');
+                return;
+            }
+            item.qty = nextQty;
+            updateCartUI();
+            saveStoreData();
+        }
+        window.changeCartQuantity = changeCartQuantity;
 
         function moveToTrash(id) {
             const index = cart.findIndex(i => i.id === id);
@@ -7039,6 +7313,101 @@ async function requestGeminiText(prompt) {
 
     throw apiError || new Error("Gemini API request failed");
 }
+
+async function getAIProductRecommendations(cartItems, recentlyViewed) {
+    const availableProducts = (window.getStoreCatalogForFirestore?.() || productsData)
+        .filter(product => product.stock > 0 && !cartItems.some(item => Number(item.id) === Number(product.id)))
+        .slice(0, 30);
+    if (!availableProducts.length) return [];
+
+    const budget = cartItems.reduce((sum, item) => sum + Number(item.price || item.unitPrice || 0) * Number(item.quantity || 1), 0);
+    const targetCategory = cartItems[0]?.category || recentlyViewed?.[0] || 'all';
+    const prompt = `أنت محرك توصية منتجات لمتجر صقر العرب المصري.\n` +
+        `السياق: الفئة المستهدفة=${targetCategory}, الميزانية الحالية للسلة=${budget} ج.م, المنتجات في السلة=${JSON.stringify(cartItems)}.` +
+        `المنتجات المتاحة=${JSON.stringify(availableProducts.map(product => ({ id: product.id, name: product.name, category: product.category, price: Number(product.price || product.unitPrice || 0) })))}` +
+        `أرجع JSON array فقط بدون Markdown وبصيغة [{"productId":رقم,"reason":"سبب عربي مختصر"}]. اختر حتى 4 منتجات مناسبة، ولا تختَر منتجات موجودة في السلة.`;
+
+    const response = await requestGeminiText(prompt);
+    const cleaned = response.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+    const parsed = JSON.parse(cleaned);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(entry => Number(entry.productId) && typeof entry.reason === 'string')
+        .map(entry => ({ productId: Number(entry.productId), reason: entry.reason.trim() }))
+        .slice(0, 4);
+}
+
+function getFallbackAIRecommendations() {
+    const cartIds = new Set(cart.map(item => Number(item.id)));
+    return (productsData || [])
+        .filter(product => product.stock > 0 && !cartIds.has(Number(product.id)))
+        .sort((first, second) => {
+            const firstRating = getProductRatingSummary(first).numericRating;
+            const secondRating = getProductRatingSummary(second).numericRating;
+            return secondRating - firstRating || getEffectiveProductPrice(first) - getEffectiveProductPrice(second);
+        })
+        .slice(0, 4)
+        .map(product => ({ productId: Number(product.id), reason: 'اختيار رائج يناسب اهتمامات عملائنا.' }));
+}
+
+async function refreshAIRecommendations() {
+    const cartItems = cart.map(item => ({ id: item.id, name: item.name, category: item.category, price: getEffectiveProductPrice(item), quantity: item.quantity || 1 }));
+    const homepageGrid = document.getElementById('aiRecommendationsGrid');
+    const cartGrid = document.getElementById('cartAIRecommendationsGrid');
+    const fallback = getFallbackAIRecommendations();
+    const fallbackReason = new Map(fallback.map(entry => [entry.productId, entry.reason]));
+
+    const renderAIGrid = (grid, compact = false) => {
+        if (!grid) return;
+        grid.innerHTML = fallback.map(entry => {
+            const product = productsData.find(item => Number(item.id) === entry.productId);
+            if (!product) return '';
+            return `<article class="${compact ? 'flex items-center gap-3 rounded-md border border-slate-800 bg-slate-900 p-2' : 'rounded-lg border border-slate-800 bg-slate-900 p-3'}">
+                <button type="button" onclick="openProductModal(${product.id})" class="${compact ? 'h-16 w-16 shrink-0' : 'block w-full text-right'}">
+                    <img src="${escapeHtml(product.img)}" alt="${escapeHtml(product.name)}" class="${compact ? 'h-16 w-16 object-contain' : 'mx-auto h-24 max-w-full object-contain'}">
+                </button>
+                <div class="${compact ? 'min-w-0 flex-1 text-right' : 'mt-2'}">
+                    <button type="button" onclick="openProductModal(${product.id})" class="line-clamp-2 text-xs font-black text-white">${escapeHtml(product.name)}</button>
+                    <p class="mt-1 text-xs font-black text-amber-400">${escapeHtml(formatMoney(getEffectiveProductPrice(product)))}</p>
+                    <span class="mt-2 block rounded-md border border-amber-500/20 bg-amber-500/10 px-2 py-1 text-[10px] leading-5 text-amber-200">${escapeHtml(fallbackReason.get(entry.productId) || 'اقتراح مناسب لك')}</span>
+                </div>
+            </article>`;
+        }).join('');
+    };
+
+    renderAIGrid(homepageGrid, false);
+    renderAIGrid(cartGrid, true);
+
+    if (!cartItems.length && !lastViewedCategory) return;
+    try {
+        const recommendations = await getAIProductRecommendations(cartItems, lastViewedCategory ? [lastViewedCategory] : []);
+        if (!recommendations.length) return;
+        const reasonMap = new Map(recommendations.map(entry => [entry.productId, entry.reason]));
+        const render = (grid, compact = false) => {
+            if (!grid) return;
+            grid.innerHTML = recommendations.map(entry => {
+                const product = productsData.find(item => Number(item.id) === entry.productId);
+                if (!product) return '';
+                return `<article class="${compact ? 'flex items-center gap-3 rounded-md border border-slate-800 bg-slate-900 p-2' : 'rounded-lg border border-slate-800 bg-slate-900 p-3'}">
+                    <button type="button" onclick="openProductModal(${product.id})" class="${compact ? 'h-16 w-16 shrink-0' : 'block w-full text-right'}">
+                        <img src="${escapeHtml(product.img)}" alt="${escapeHtml(product.name)}" class="${compact ? 'h-16 w-16 object-contain' : 'mx-auto h-24 max-w-full object-contain'}">
+                    </button>
+                    <div class="${compact ? 'min-w-0 flex-1 text-right' : 'mt-2'}">
+                        <button type="button" onclick="openProductModal(${product.id})" class="line-clamp-2 text-xs font-black text-white">${escapeHtml(product.name)}</button>
+                        <p class="mt-1 text-xs font-black text-amber-400">${escapeHtml(formatMoney(getEffectiveProductPrice(product)))}</p>
+                        <span class="mt-2 block rounded-md border border-amber-500/20 bg-amber-500/10 px-2 py-1 text-[10px] leading-5 text-amber-200"><i class="fa-solid fa-wand-magic-sparkles ml-1"></i>${escapeHtml(reasonMap.get(entry.productId) || '')}</span>
+                    </div>
+                </article>`;
+            }).join('');
+        };
+        render(homepageGrid, false);
+        render(cartGrid, true);
+    } catch (error) {
+        console.warn('Gemini recommendations unavailable; fallback retained.', error);
+    }
+}
+window.getAIProductRecommendations = getAIProductRecommendations;
+window.refreshAIRecommendations = refreshAIRecommendations;
+
 // إرسال السؤال للمساعد الذكي أو محاكاة موظف خدمة العملاء مع حفظ الرسائل في سجل الحساب.
 async function sendChatMessage() {
     const inputField = document.getElementById('chatInput');
@@ -7128,6 +7497,7 @@ function escapeHtml(text) {
         import {
             getFirestore,
             collection,
+            addDoc,
             doc,
             getDoc,
             getDocs,
@@ -7163,12 +7533,14 @@ function escapeHtml(text) {
         const usersCollection = collection(firestore, 'users');
         const ratingsCollection = collection(firestore, 'ratings');
         const ordersCollection = collection(firestore, 'orders');
+        const auditLogsCollection = collection(firestore, 'audit_logs');
         const productCounterRef = doc(firestore, 'meta', 'productCatalog');
         let authMode = 'login';
         let phoneConfirmation = null;
         let recaptchaVerifier = null;
         let authReady = false;
         let currentAuthUser = null;
+        let auditLogsUnsubscribe = null;
         let currentFirestoreRole = 'customer';
         let authStateRevision = 0;
         let roleUnsubscribe = null;
@@ -7751,6 +8123,7 @@ function escapeHtml(text) {
                 });
                 return newProductRef;
             });
+            await logAdminAction('CREATE_PRODUCT', `تمت إضافة منتج جديد: ${product.name}.`);
             return productRef.id;
         }
         // حفظ السعر والمخزون والصورة في سجل المنتج نفسه على Firestore.
@@ -7782,6 +8155,11 @@ function escapeHtml(text) {
                     });
                 }
             });
+            const changedFields = Object.keys(updates).filter(key => key !== 'updatedAt');
+            await logAdminAction(
+                changedFields.includes('price') ? 'UPDATE_PRICE' : 'UPDATE_PRODUCT',
+                `تم تعديل منتج ${product.name || productId}${Object.prototype.hasOwnProperty.call(updates, 'price') ? ` من ${product.price} إلى ${updates.price}` : ''}.`
+            );
         }
 
         // حذف سجل المنتج من Firestore لتنعكس الإزالة مباشرة على جميع الأجهزة.
@@ -7804,6 +8182,7 @@ function escapeHtml(text) {
                     });
                 }
             });
+            await logAdminAction('DELETE_PRODUCT', `تم حذف المنتج ${product.name || productId}.`);
         }
 // إنشاء قسم بمعرّف ثابت وإبلاغ المدير عند تكرار الاسم أو المعرّف.
         async function createFirestoreCategory(name) {
@@ -7852,6 +8231,7 @@ function escapeHtml(text) {
                 throw new Error('لا يمكن إزالة صلاحية حساب الإدارة الأساسي.');
             }
             await updateDoc(targetRef, { role, updatedAt: serverTimestamp() });
+            await logAdminAction('CHANGE_USER_ROLE', `تم تغيير دور المستخدم ${target.data().email || uid} إلى ${role === 'admin' ? 'مدير' : 'عميل'}.`);
         }
 
         // إزالة ملف المستخدم من مجموعة المتجر من دون حذف حساب المصادقة.
@@ -7867,6 +8247,7 @@ function escapeHtml(text) {
                 throw new Error('لا يمكن إزالة سجل حساب الإدارة الأساسي.');
             }
             await deleteDoc(targetRef);
+            await logAdminAction('DELETE_USER', `تم حذف ملف المستخدم ${target.data().email || uid}.`);
         }
 
         async function deleteProductRating(reviewId) {
@@ -8009,6 +8390,106 @@ function escapeHtml(text) {
             }
         }
 
+        async function trackOrderById(event) {
+            event?.preventDefault?.();
+            const input = document.getElementById('orderTrackingInput');
+            const submit = document.getElementById('orderTrackingSubmit');
+            const message = document.getElementById('orderTrackingMessage');
+            const result = document.getElementById('orderTrackingResult');
+            const orderId = String(input?.value || '').trim();
+
+            if (!orderId) {
+                message.className = 'mt-3 min-h-5 text-sm font-bold text-red-400';
+                message.textContent = 'أدخل رقم الطلب أولاً.';
+                result.classList.add('hidden');
+                return;
+            }
+            if (!firebaseAuth.currentUser) {
+                message.className = 'mt-3 min-h-5 text-sm font-bold text-red-400';
+                message.textContent = 'سجّل الدخول لتتبع الطلبات المرتبطة بحسابك.';
+                result.classList.add('hidden');
+                openAuthModal();
+                return;
+            }
+
+            submit.disabled = true;
+            submit.classList.add('cursor-wait');
+            message.className = 'mt-3 min-h-5 text-sm font-bold text-slate-400';
+            message.textContent = 'جارٍ البحث عن الطلب...';
+            result.classList.add('hidden');
+
+            try {
+                const snapshot = await getDocs(query(
+                    ordersCollection,
+                    where('orderId', '==', orderId),
+                    where('userId', '==', firebaseAuth.currentUser.uid)
+                ));
+                if (snapshot.empty) throw new Error('ORDER_NOT_FOUND');
+
+                const documents = snapshot.docs.map(orderDoc => ({ documentId: orderDoc.id, ...orderDoc.data() }));
+                const first = documents[0];
+                const total = documents.reduce((sum, order) => sum + (Number(order.totalPrice) || 0), 0);
+                const statusText = documents
+                    .map(order => `${order.status || ''} ${order.statusLabel || ''} ${order.deliveryStage || ''}`)
+                    .join(' ')
+                    .toLocaleLowerCase('ar-EG');
+
+                let stage = 0;
+                if (statusText.includes('completed') || statusText.includes('مكتمل') || statusText.includes('تم التسليم') || statusText.includes('تم التوصيل')) {
+                    stage = 2;
+                } else if (statusText.includes('shipped') || statusText.includes('shipping') || statusText.includes('في الطريق') || statusText.includes('تجهيز') || statusText.includes('processing')) {
+                    stage = 1;
+                }
+
+                document.getElementById('trackedOrderId').textContent = orderId;
+                document.getElementById('trackedCustomerName').textContent = first.customerName || first.customer?.name || 'غير متاح';
+                document.getElementById('trackedOrderTotal').textContent = formatMoney(total);
+
+                const rawDate = first.createdAt?.toDate?.() || first.createdAt || first.date || first.timestamp;
+                const date = rawDate ? new Date(rawDate) : null;
+                document.getElementById('trackedOrderDate').textContent = date && !Number.isNaN(date.getTime())
+                    ? date.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })
+                    : 'غير متاح';
+
+                document.getElementById('trackedProductsList').innerHTML = documents.map(order => `
+                    <div class="flex items-center justify-between gap-4 rounded-md border border-slate-800 bg-slate-950 px-3 py-2">
+                        <span class="font-bold">${escapeHtml(order.productName || 'منتج')}</span>
+                        <span class="shrink-0 text-xs text-slate-400">الكمية: ${escapeHtml(String(order.quantity ?? 1))} · ${escapeHtml(formatMoney(order.totalPrice || 0))}</span>
+                    </div>
+                `).join('');
+
+                for (let index = 0; index < 3; index += 1) {
+                    const step = document.getElementById(`trackingStep${index}`);
+                    const circle = step.querySelector('.tracking-step-circle');
+                    const title = step.querySelector('strong');
+                    const active = index <= stage;
+                    circle.className = `tracking-step-circle relative z-10 flex h-12 w-12 items-center justify-center rounded-full border-2 ${active ? 'border-amber-500 bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'border-slate-700 bg-slate-950 text-slate-500'}`;
+                    title.className = `mt-3 text-sm ${active ? 'font-black text-white' : 'text-slate-400'}`;
+                }
+                document.getElementById('trackingProgressLine').style.width = `${stage * 50}%`;
+
+                message.className = 'mt-3 min-h-5 text-sm font-bold text-green-400';
+                message.textContent = 'تم العثور على بيانات الطلب.';
+                result.classList.remove('hidden');
+            } catch (error) {
+                result.classList.add('hidden');
+                message.className = 'mt-3 min-h-5 text-sm font-bold text-red-400';
+                if (error?.message === 'ORDER_NOT_FOUND') {
+                    message.textContent = 'رقم الطلب غير صحيح، يرجى التأكد والمحاولة مرة أخرى.';
+                } else if (error?.code === 'permission-denied') {
+                    message.textContent = 'لا تملك صلاحية عرض هذا الطلب. تأكد من تسجيل الدخول بالحساب المستخدم عند إنشاء الطلب.';
+                } else {
+                    console.error('Order tracking lookup failed:', error);
+                    message.textContent = 'تعذر تتبع الطلب حالياً. تحقق من الاتصال وحاول مرة أخرى.';
+                }
+            } finally {
+                submit.disabled = false;
+                submit.classList.remove('cursor-wait');
+            }
+        }
+
+        window.trackOrderById = trackOrderById;
+
         function watchFirestoreOrders(isAdmin) {
             if (!isAdmin) {
                 if (adminOrdersUnsubscribe) adminOrdersUnsubscribe();
@@ -8038,6 +8519,41 @@ function escapeHtml(text) {
             subscribeToFirestoreProducts();
             subscribeToFirestoreCategories();
         }
+
+        async function logAdminAction(actionType, details) {
+            if (!isStoreAdmin()) return;
+            const currentUser = firebaseAuth.currentUser;
+            const logId = `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+            await addDoc(auditLogsCollection, {
+                logId,
+                adminEmail: String(currentUser?.email || window.alNadamFirebaseUser?.email || '').trim(),
+                adminName: String(currentUser?.displayName || window.alNadamFirebaseUser?.displayName || 'مدير المتجر').trim(),
+                actionType: String(actionType || 'UNKNOWN_ACTION'),
+                details: String(details || ''),
+                timestamp: serverTimestamp(),
+                ipAddress: '',
+                userAgent: navigator.userAgent || ''
+            });
+        }
+
+        function watchAuditLogs() {
+            auditLogsUnsubscribe?.();
+            auditLogsUnsubscribe = onSnapshot(query(auditLogsCollection), snapshot => {
+                window.auditLogs = snapshot.docs.map(logDoc => ({ documentId: logDoc.id, ...logDoc.data() }))
+                    .sort((first, second) => {
+                        const firstTime = first.timestamp?.toMillis?.() || 0;
+                        const secondTime = second.timestamp?.toMillis?.() || 0;
+                        return secondTime - firstTime;
+                    });
+                renderAuditLogsTable();
+            }, error => {
+                const body = document.getElementById('auditLogsTableBody');
+                if (body) body.innerHTML = '<tr><td colspan="5" class="p-5 text-center text-red-400">تعذر تحميل سجل الأنشطة.</td></tr>';
+                console.error('Firestore audit log listener failed:', error);
+            });
+        }
+
+        window.logAdminAction = logAdminAction;
 
         async function syncFirestoreUserOrders(userId, orders) {
             if (!userId || !firebaseAuth.currentUser || firebaseAuth.currentUser.uid !== userId) {
@@ -8070,6 +8586,7 @@ function escapeHtml(text) {
                         : 'confirmed',
                 updatedAt: serverTimestamp()
             });
+            await logAdminAction('CHANGE_ORDER_STATUS', `تم تغيير حالة الطلب ${safeDocumentId} إلى ${statusLabel}.`);
         }
 
         window.addFirestoreProduct = addFirestoreProduct;
@@ -8108,6 +8625,7 @@ function escapeHtml(text) {
                     currentFirestoreRole = 'admin';
                     publishAuthState(user, 'admin');
                     watchAdminUserList(user, true);
+                    watchAuditLogs();
                     document.getElementById('adminNavButton')?.classList.remove('hidden');
                 }
                 try {
@@ -8123,6 +8641,7 @@ function escapeHtml(text) {
                     currentFirestoreRole = allowlistedAdmin ? 'admin' : 'customer';
                     publishAuthState(user, currentFirestoreRole);
                     watchAdminUserList(user, allowlistedAdmin);
+                    if (allowlistedAdmin) watchAuditLogs();
                     setFirestoreAdminStatus(getFriendlyFirestoreError(error), true);
                     window.showToast?.(getFriendlyFirestoreError(error), 'error');
                 }
