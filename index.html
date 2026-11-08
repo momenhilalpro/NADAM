@@ -4836,23 +4836,16 @@
             if (!isStoreAdmin()) return;
             const rows = document.getElementById('adminOrderRows');
             if (!rows) return;
-            const allOrders = firestoreOrders.length
-                ? firestoreOrders.map(order => ({
+            const allOrders = firestoreOrders.map(order => ({
                     ...order,
+                    documentId: order.documentId || order.id,
                     id: order.orderId || order.id,
                     customerName: order.customer?.name || order.customerName || '',
                     total: order.totalPrice || order.total || 0,
                     timestamp: order.createdAt?.toDate
                         ? order.createdAt.toDate().toISOString()
                         : (order.createdAt || order.timestamp || '')
-                }))
-                : Object.values(usersById).flatMap(user =>
-                    (Array.isArray(user.orders) ? user.orders : []).map(order => ({
-                        ...order,
-                        customerName: order.customerName || user.name,
-                        userId: user.id
-                    }))
-                );
+                }));
             allOrders.sort((first, second) =>
                 new Date(second.timestamp || second.createdAt || second.date || 0).getTime() -
                 new Date(first.timestamp || first.createdAt || first.date || 0).getTime()
@@ -4874,17 +4867,23 @@
             rows.innerHTML = filteredOrders.map(order => {
                 const status = order.status === 'pending' ? 'processing'
                     : order.status === 'completed' ? 'completed'
+                    : order.status === 'cancelled' ? 'cancelled'
                     : isOrderCompleted(order) ? 'completed' :
                     isOrderCancelled(order) ? 'cancelled' : 'processing';
+                const statusLabels = {
+                    processing: 'قيد المعالجة',
+                    completed: 'مكتمل',
+                    cancelled: 'ملغي'
+                };
                 return `<tr>
                     <td class="p-2 font-bold" dir="ltr">${escapeHtml(order.id)}</td>
                     <td class="p-2">${escapeHtml(order.customerName)}</td>
                     <td class="p-2">${escapeHtml(order.productName || '—')}<span class="block text-[10px] text-gray-500">الكمية: ${escapeHtml(String(order.quantity ?? 1))}</span></td>
                     <td class="p-2">${escapeHtml(order.date || (order.timestamp ? String(order.timestamp).slice(0, 10) : ''))}</td>
                     <td class="p-2 font-bold">${formatMoney(order.total || 0)}${order.refundAmount ? `<span class="block text-[10px] text-green-700">مسترد ${formatMoney(order.refundAmount)}</span>` : ''}</td>
-                    <td class="p-2">${escapeHtml(order.status || 'قيد المعالجة')}${order.returnRequest ? `<span class="block text-[10px] text-purple-700">طلب الإرجاع: ${escapeHtml(order.returnRequest.status === 'requested' ? 'بانتظار الموافقة' : order.returnRequest.status === 'approved' ? 'تمت الموافقة' : 'مرفوض')}</span>` : ''}</td>
+                    <td class="p-2">${escapeHtml(order.statusLabel || statusLabels[status])}${order.returnRequest ? `<span class="block text-[10px] text-purple-700">طلب الإرجاع: ${escapeHtml(order.returnRequest.status === 'requested' ? 'بانتظار الموافقة' : order.returnRequest.status === 'approved' ? 'تمت الموافقة' : 'مرفوض')}</span>` : ''}</td>
                     <td class="p-2">
-                        <select data-user-id="${escapeHtml(order.userId)}" data-order-id="${escapeHtml(order.id)}" onchange="updateAdminOrderStatus(this.dataset.userId,this.dataset.orderId,this.value)" class="rounded border p-1.5">
+                        <select data-document-id="${escapeHtml(order.documentId)}" onchange="updateAdminOrderStatus(this.dataset.documentId,this.value)" class="rounded border p-1.5">
                             <option value="processing" ${status === 'processing' ? 'selected' : ''}>قيد المعالجة</option>
                             <option value="completed" ${status === 'completed' ? 'selected' : ''}>مكتمل</option>
                             <option value="cancelled" ${status === 'cancelled' ? 'selected' : ''}>ملغي</option>
@@ -4895,57 +4894,31 @@
             }).join('');
         }
 
-        // تحديث حالة الطلب في ملف العميل نفسه ثم إعادة احتساب مؤشرات لوحة الإدارة.
-        async function updateAdminOrderStatus(userId, orderId, status) {
+        // تحديث حالة الطلب مباشرةً في مستند Firestore دون تخزينها محلياً.
+        async function updateAdminOrderStatus(documentId, status) {
             if (!isStoreAdmin()) {
                 showToast('غير مصرح لك بتحديث الطلبات.', 'error');
                 return;
             }
-            const statusLabels = { processing: 'قيد المعالجة', completed: 'مكتمل', cancelled: 'ملغي' };
-            if (!statusLabels[status] || !usersById[userId]) {
-                showToast('تعذر تحديث حالة الطلب المحدد.', 'error');
-                renderAdminDashboard();
+            const statusLabels = {
+                processing: 'قيد المعالجة',
+                completed: 'مكتمل',
+                cancelled: 'ملغي'
+            };
+            if (!documentId || !statusLabels[status]) {
+                showToast('تعذر تحديد حالة الطلب.', 'error');
                 return;
             }
             try {
-                if (typeof window.updateFirestoreOrderStatus === 'function') {
-                    await window.updateFirestoreOrderStatus(userId, orderId, statusLabels[status], status);
+                if (typeof window.updateFirestoreOrderStatus !== 'function') {
+                    throw new Error('خدمة تحديث الطلبات غير جاهزة.');
                 }
-                const savedData = JSON.parse(localStorage.getItem(loyaltyStorageKey) || '{}');
-                const savedUsers = savedData.users || usersById;
-                const profile = savedUsers[userId];
-                if (!profile || !Array.isArray(profile.orders)) throw new Error('Order profile is unavailable');
-                let updated = false;
-                const nextOrders = profile.orders.map(order => {
-                    if (order.id !== orderId) return order;
-                    if (order.returnRequest?.status === 'approved') throw new Error('An approved return cannot change its order status');
-                    updated = true;
-                    const deliveryStage = status === 'completed' ? 'delivered' : status === 'cancelled' ? 'cancelled' : 'confirmed';
-                    return {
-                        ...order,
-                        status: statusLabels[status],
-                        deliveryStage,
-                        trackingStartedAt: status === 'processing' ? new Date().toISOString() : order.trackingStartedAt
-                    };
-                });
-                if (!updated) throw new Error('Order not found');
-                const nextUsers = { ...savedUsers, [userId]: { ...profile, orders: nextOrders } };
-                localStorage.setItem(loyaltyStorageKey, JSON.stringify({
-                    activeUserId: savedData.activeUserId || activeUserId,
-                    users: nextUsers
-                }));
-                usersById = { ...usersById, [userId]: { ...usersById[userId], orders: nextOrders } };
-                if (activeUserId === userId) {
-                    activeUser = usersById[userId];
-                    persistedOrders = [...nextOrders];
-                    ordersHistory = [...nextOrders];
-                    renderOrdersHistory();
-                }
-                renderAdminDashboard();
-                showToast('تم تحديث حالة الطلب وحساب المؤشرات من جديد.');
+                await window.updateFirestoreOrderStatus(documentId, statusLabels[status], status);
+                showToast('تم تحديث حالة الطلب بنجاح.');
             } catch (error) {
-                showToast('تعذر حفظ حالة الطلب محلياً. حاول مرة أخرى.', 'error');
-                renderAdminDashboard();
+                console.error('Firestore order status update failed:', error);
+                showToast(error.message || 'تعذر تحديث حالة الطلب في Firestore.', 'error');
+                renderAdminOrders();
             }
         }
 
@@ -7808,36 +7781,27 @@ function escapeHtml(text) {
             }, { merge: true });
         }
 
-        async function updateFirestoreOrderStatus(userId, orderId, statusLabel, statusKey) {
+        async function updateFirestoreOrderStatus(documentId, statusLabel, statusKey) {
             if (!isStoreAdmin()) throw new Error('غير مصرح لك بتحديث الطلبات.');
-            const userRef = doc(usersCollection, userId);
-            const snapshot = await getDoc(userRef);
-            if (!snapshot.exists()) throw new Error('سجل العميل غير موجود.');
-            const orders = Array.isArray(snapshot.data().orders) ? snapshot.data().orders : [];
-            let updated = false;
-            const nextOrders = orders.map(order => {
-                if (order.id !== orderId) return order;
-                if (order.returnRequest?.status === 'approved') throw new Error('لا يمكن تغيير حالة طلب اعتمد إرجاعه.');
-                updated = true;
-                return {
-                    ...order,
-                    status: statusLabel,
-                    deliveryStage: statusKey === 'completed' ? 'delivered' : statusKey === 'cancelled' ? 'cancelled' : 'confirmed',
-                    trackingStartedAt: statusKey === 'processing' ? new Date().toISOString() : order.trackingStartedAt
-                };
+            const safeDocumentId = String(documentId || '').trim();
+            if (!safeDocumentId || safeDocumentId.includes('/')) {
+                throw new Error('معرّف الطلب غير صالح.');
+            }
+            const firestoreStatus = statusKey === 'completed'
+                ? 'completed'
+                : statusKey === 'cancelled'
+                    ? 'cancelled'
+                    : 'pending';
+            await updateDoc(doc(ordersCollection, safeDocumentId), {
+                status: firestoreStatus,
+                statusLabel,
+                deliveryStage: statusKey === 'completed'
+                    ? 'delivered'
+                    : statusKey === 'cancelled'
+                        ? 'cancelled'
+                        : 'confirmed',
+                updatedAt: serverTimestamp()
             });
-            if (!updated) throw new Error('الطلب غير موجود في سجل العميل.');
-            await updateDoc(userRef, { orders: nextOrders, updatedAt: serverTimestamp() });
-            const firestoreOrderSnapshot = await getDocs(
-                query(ordersCollection, where('orderId', '==', orderId))
-            );
-            await Promise.all(firestoreOrderSnapshot.docs.map(orderDoc =>
-                updateDoc(orderDoc.ref, {
-                    status: statusKey === 'completed' ? 'completed' : 'pending',
-                    statusLabel: statusLabel,
-                    updatedAt: serverTimestamp()
-                })
-            ));
         }
 
         window.addFirestoreProduct = addFirestoreProduct;
