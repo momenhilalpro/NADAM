@@ -6216,16 +6216,8 @@
             });
 
             const recBox = document.getElementById('aiRecommendationBox');
-            recBox.innerHTML = `
-                <div class="bg-amazon-orange text-amazon-navy p-2 rounded-full font-black text-lg">
-                    <i class="fa-solid fa-lightbulb"></i>
-                </div>
-                <div class="text-xs">
-                    <span class="font-black text-amazon-navy text-sm block">تحليل المقارنة الذكي من Gemini:</span>
-                    <p id="compareAiAdvice" class="text-gray-700 font-semibold mt-0.5">جارٍ تحليل الأسعار والمواصفات والتقييمات... 🤖</p>
-                    <p class="text-gray-500 text-[11px] mt-1">الاختيار الأولي حسب مؤشر الأداء إلى السعر: ${escapeHtml(bestProduct.name)} (${bestProduct.score}/100، <span data-price-egp="${getEffectiveProductPrice(bestProduct)}">${formatMoney(getEffectiveProductPrice(bestProduct))}</span>).</p>
-                </div>
-            `;
+            recBox.className = 'mb-4 overflow-hidden rounded-xl border border-slate-800 bg-slate-900 shadow-[0_0_28px_rgba(245,158,11,0.08)]';
+            recBox.innerHTML = renderGeminiComparisonHtml('', [...compareItems], bestProduct, true);
 
             const container = document.getElementById('compareModalContent');
             const isMobile = window.matchMedia('(max-width: 639px)').matches;
@@ -6287,6 +6279,136 @@
             analyzeCompareItems([...compareItems], ++compareAnalysisRequestId);
         }
 
+        function renderGeminiComparisonHtml(advice, items, bestProduct, isLoading = false) {
+            const safeAdvice = escapeHtml(String(advice || ''))
+                .replace(/\*\*(.+?)\*\*/g, '<strong class="text-white">$1</strong>')
+                .replace(/`([^`]+)`/g, '<code class="rounded bg-slate-950 px-1.5 py-0.5 text-amber-300">$1</code>');
+
+            const lines = String(advice || '')
+                .split(/\n+/)
+                .map(line => line.replace(/^\s*(?:[-*•]\s*|\d+[.)]\s*|#+\s*)/, '').trim())
+                .filter(Boolean);
+
+            const recommendationLine = lines.find(line =>
+                /التوصية|يوصى|نوصي|اختيار|أفضل خيار|الخيار الأفضل/i.test(line)
+            );
+            const recommendation = recommendationLine || (bestProduct
+                ? `الاختيار الأكثر توازناً هو ${bestProduct.name}، مع مراعاة السعر والأداء والتقييم والمخزون المتاح.`
+                : 'اختر المنتج الأقرب إلى احتياجاتك وميزانيتك.');
+
+            const suitabilityCards = items.map((item, index) => {
+                const itemName = escapeHtml(item.name);
+                const matchingLine = lines.find(line =>
+                    line.toLowerCase().includes(String(item.name).toLowerCase())
+                    && /يناسب|مناسب|لمن|مميز|أفضل/i.test(line)
+                );
+                const safeDetails = matchingLine
+                    ? escapeHtml(matchingLine).replace(/\*\*(.+?)\*\*/g, '<strong class="text-white">$1</strong>')
+                    : item.stock > 0
+                        ? `مناسب للمشترين الذين يبحثون عن أداء متوازن، وبسعر ${formatMoney(getEffectiveProductPrice(item))}.`
+                        : 'مناسب لمن يرغب بالانتظار حتى يتوفر المخزون مجدداً.';
+                const border = index % 2 === 0 ? 'border-r-amber-500' : 'border-r-emerald-500';
+
+                return `
+                    <article class="rounded-xl border border-slate-800 ${border} border-r-4 bg-slate-950 p-4 shadow-lg">
+                        <div class="mb-2 flex items-center justify-between gap-2">
+                            <h4 class="font-black text-white">${itemName}</h4>
+                            <span class="text-[10px] font-bold text-slate-400">مناسب لـ</span>
+                        </div>
+                        <p class="text-sm leading-7 text-slate-300">${safeDetails}</p>
+                    </article>
+                `;
+            }).join('');
+
+            const responseDetails = safeAdvice
+                ? lines.slice(0, 8).map(line => `
+                    <li class="rounded-lg border border-slate-800 bg-slate-950 px-3 py-2.5 text-xs leading-6 text-slate-300">${escapeHtml(line).replace(/\*\*(.+?)\*\*/g, '<strong class="text-white">$1</strong>')}</li>
+                `).join('')
+                : '<li class="rounded-lg border border-slate-800 bg-slate-950 px-3 py-4 text-center text-xs text-slate-400">جارٍ تحليل الأسعار والمواصفات والتقييمات...</li>';
+
+            return `
+                <div class="border-b border-slate-800 bg-gradient-to-l from-slate-950 via-slate-900 to-slate-950 px-4 py-5 sm:px-6">
+                    <div class="flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-3">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-full border border-amber-400/40 bg-amber-500/10 text-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.28)]">
+                                <i class="fa-solid fa-wand-magic-sparkles text-lg"></i>
+                            </div>
+                            <div>
+                                <p class="text-[11px] font-bold text-amber-400">تحليل مدعوم بالذكاء الاصطناعي</p>
+                                <h3 class="mt-0.5 text-base font-black text-white sm:text-lg">مقارنة Gemini الذكية</h3>
+                            </div>
+                        </div>
+                        <span class="${isLoading ? 'animate-pulse' : ''} rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-[10px] font-black text-amber-300">
+                            ${isLoading ? 'جاري التحليل' : 'AI Ready'}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="p-4 sm:p-6">
+                    <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
+                        <section class="rounded-xl border border-slate-800 bg-slate-950 p-4">
+                            <h4 class="mb-3 flex items-center gap-2 text-sm font-black text-amber-400">
+                                <i class="fa-solid fa-tags"></i> السعر والمخزون
+                            </h4>
+                            <div class="space-y-2">
+                                ${items.map(item => `
+                                    <div class="flex items-center justify-between gap-2 rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-xs">
+                                        <span class="max-w-[55%] truncate font-bold text-slate-200">${escapeHtml(item.name)}</span>
+                                        <span class="text-left">
+                                            <strong class="block text-amber-400" data-price-egp="${getEffectiveProductPrice(item)}">${formatMoney(getEffectiveProductPrice(item))}</strong>
+                                            <small class="${item.stock > 0 ? 'text-emerald-400' : 'text-rose-400'}">${item.stock > 0 ? 'متوفر' : 'غير متوفر'}</small>
+                                        </span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </section>
+
+                        <section class="rounded-xl border border-slate-800 bg-slate-950 p-4">
+                            <h4 class="mb-3 flex items-center gap-2 text-sm font-black text-amber-400">
+                                <i class="fa-solid fa-chart-line"></i> الأداء والتقييم
+                            </h4>
+                            <div class="space-y-2">
+                                ${items.map(item => `
+                                    <div class="rounded-lg border border-slate-800 bg-slate-900 px-3 py-2.5">
+                                        <p class="mb-2 truncate text-xs font-bold text-slate-200">${escapeHtml(item.name)}</p>
+                                        <div class="flex justify-between text-xs">
+                                            <span class="text-slate-400">الأداء</span>
+                                            <strong class="text-emerald-400">${Number(item.score || 0)}/100</strong>
+                                        </div>
+                                        <div class="mt-2 flex justify-between text-xs">
+                                            <span class="text-slate-400">التقييم</span>
+                                            <strong class="text-amber-400"><i class="fa-solid fa-star ml-1"></i>${Number(item.rating || 0).toFixed(1)}</strong>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </section>
+
+                        <section class="rounded-xl border border-slate-800 bg-slate-950 p-4">
+                            <h4 class="mb-3 flex items-center gap-2 text-sm font-black text-amber-400">
+                                <i class="fa-solid fa-microchip"></i> المواصفات
+                            </h4>
+                            <ul class="space-y-2">${responseDetails}</ul>
+                        </section>
+                    </div>
+
+                    <section class="mt-4">
+                        <h4 class="mb-3 text-sm font-black text-white">
+                            <i class="fa-solid fa-users-viewfinder ml-2 text-amber-400"></i> لمن يناسب كل منتج؟
+                        </h4>
+                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">${suitabilityCards}</div>
+                    </section>
+
+                    <section class="mt-4 rounded-xl border-2 border-amber-500/80 bg-gradient-to-l from-amber-500/10 via-slate-950 to-slate-950 p-4 shadow-[0_0_24px_rgba(245,158,11,0.12)]">
+                        <div class="mb-2 flex items-center gap-2">
+                            <span class="rounded-md bg-amber-500 px-2.5 py-1 text-[10px] font-black text-slate-950">توصية صقر العرب</span>
+                        </div>
+                        <p class="text-sm font-bold leading-7 text-slate-100">${escapeHtml(String(recommendation)).replace(/\*\*(.+?)\*\*/g, '<strong class="text-amber-400">$1</strong>')}</p>
+                    </section>
+                </div>
+            `;
+        }
+
         async function analyzeCompareItems(items, requestId) {
             const productsDescription = items.map((item, index) => ({
                 product: index + 1,
@@ -6304,16 +6426,31 @@
             try {
                 const advice = await requestGeminiText(prompt);
                 if (requestId !== compareAnalysisRequestId) return;
-                const currentAdviceElement = document.getElementById('compareAiAdvice');
-                if (currentAdviceElement) currentAdviceElement.innerHTML = escapeHtml(advice).replace(/\n/g, '<br>');
+                const recBox = document.getElementById('aiRecommendationBox');
+                if (recBox) {
+                    const bestFallback = items.reduce((best, item) => {
+                        const itemRatio = Number(item.score || 0) / Math.max(1, getEffectiveProductPrice(item));
+                        const bestRatio = Number(best.score || 0) / Math.max(1, getEffectiveProductPrice(best));
+                        return itemRatio > bestRatio ? item : best;
+                    }, items[0]);
+                    recBox.className = 'mb-4 overflow-hidden rounded-xl border border-slate-800 bg-slate-900 shadow-[0_0_28px_rgba(245,158,11,0.08)]';
+                    recBox.innerHTML = renderGeminiComparisonHtml(advice, items, bestFallback, false);
+                }
             } catch (error) {
                 console.error("Gemini Compare Error:", error);
                 if (requestId !== compareAnalysisRequestId) return;
-                const currentAdviceElement = document.getElementById('compareAiAdvice');
-                if (currentAdviceElement) {
-                    currentAdviceElement.textContent = [429, 500, 502, 503, 504].includes(error.status)
-                        ? "خدمة التحليل مزدحمة مؤقتاً. يمكنك استخدام جدول المقارنة والاختيار الأولي أعلاه."
-                        : "تعذر تحليل المنتجات حالياً. يمكنك استخدام جدول المقارنة والاختيار الأولي أعلاه.";
+                const recBox = document.getElementById('aiRecommendationBox');
+                if (recBox) {
+                    const fallbackMessage = [429, 500, 502, 503, 504].includes(error.status)
+                        ? "خدمة التحليل مزدحمة مؤقتاً. يمكنك الاعتماد على جدول المقارنة والاختيار الأولي أعلاه."
+                        : "تعذر تحليل المنتجات حالياً. يمكنك الاعتماد على جدول المقارنة والاختيار الأولي أعلاه.";
+                    const bestFallback = items.reduce((best, item) => {
+                        const itemRatio = Number(item.score || 0) / Math.max(1, getEffectiveProductPrice(item));
+                        const bestRatio = Number(best.score || 0) / Math.max(1, getEffectiveProductPrice(best));
+                        return itemRatio > bestRatio ? item : best;
+                    }, items[0]);
+                    recBox.className = 'mb-4 overflow-hidden rounded-xl border border-slate-800 bg-slate-900 shadow-[0_0_28px_rgba(245,158,11,0.08)]';
+                    recBox.innerHTML = renderGeminiComparisonHtml(fallbackMessage, items, bestFallback, false);
                 }
             }
         }
