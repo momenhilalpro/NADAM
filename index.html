@@ -4325,16 +4325,16 @@
 
         function renderAdminCharts() {
             if (!window.Chart) return;
-            const allOrders = Object.values(usersById).flatMap(user =>
-                (Array.isArray(user.orders) ? user.orders : []).map(order => ({ ...order }))
-            );
+            const allOrders = Array.isArray(firestoreOrders) ? firestoreOrders : [];
             const monthly = new Map();
             allOrders.forEach(order => {
                 if (isOrderCancelled(order)) return;
-                const date = new Date(order.timestamp || order.date);
-                const key = Number.isNaN(date.getTime()) ? 'غير معروف' :
-                    `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-                monthly.set(key, (monthly.get(key) || 0) + Math.max(0, Number(order.total || 0) - Number(order.refundAmount || 0)));
+                const dateValue = typeof order.createdAt?.toDate === 'function'
+                    ? order.createdAt.toDate()
+                    : new Date(order.createdAt || order.timestamp || order.date);
+                const key = Number.isNaN(dateValue.getTime()) ? 'غير معروف' :
+                    `${dateValue.getFullYear()}-${String(dateValue.getMonth() + 1).padStart(2, '0')}`;
+                monthly.set(key, (monthly.get(key) || 0) + Math.max(0, parseOrderPrice(order) - parseOrderRefund(order)));
             });
             const monthKeys = [...monthly.keys()].sort().slice(-12);
             const revenueLabels = monthKeys.map(key => key === 'غير معروف' ? key :
@@ -4380,30 +4380,77 @@
         function renderAdminMetrics() {
             if (!isStoreAdmin()) return;
             const profiles = Object.values(usersById);
-            const allOrders = profiles.flatMap(user =>
-                (Array.isArray(user.orders) ? user.orders : []).map(order => ({ ...order, customerName: order.customerName || user.name }))
-            );
-            const validOrders = allOrders.filter(order => Number.isFinite(Number(order.total)));
-            const salesTotal = validOrders.reduce((sum, order) =>
-                isOrderCancelled(order) ? sum : sum + Math.max(0, Number(order.total) - Number(order.refundAmount || 0)), 0);
+            const realtimeOrders = Array.isArray(firestoreOrders) ? firestoreOrders : [];
+            const validOrders = realtimeOrders.filter(order => {
+                const amount = parseOrderPrice(order);
+                return Number.isFinite(amount);
+            });
+            const salesTotal = validOrders.reduce((sum, order) => {
+                if (isOrderCancelled(order)) return sum;
+                return sum + Math.max(0, parseOrderPrice(order) - parseOrderRefund(order));
+            }, 0);
             document.getElementById('adminTotalSales').textContent = formatMoney(salesTotal);
+            const completedOrderIds = new Set(
+                validOrders
+                    .filter(isOrderCompleted)
+                    .map(order => String(order.orderId || order.id || '').trim())
+                    .filter(Boolean)
+            );
             document.getElementById('adminCompletedOrders').textContent =
-                validOrders.filter(isOrderCompleted).length.toLocaleString('ar-EG');
-            document.getElementById('adminTotalOrders').textContent = validOrders.length.toLocaleString('ar-EG');
+                (completedOrderIds.size || validOrders.filter(isOrderCompleted).length).toLocaleString('ar-EG');
+            const uniqueOrderIds = new Set(
+                validOrders
+                    .map(order => String(order.orderId || order.id || '').trim())
+                    .filter(Boolean)
+            );
+            document.getElementById('adminTotalOrders').textContent =
+                (uniqueOrderIds.size || validOrders.length).toLocaleString('ar-EG');
             document.getElementById('adminRegisteredUsers').textContent =
                 (firestoreUsers.length || profiles.length).toLocaleString('ar-EG');
         }
 
         // توحيد فحص حالات الإكمال والإلغاء لدقة المؤشرات المالية.
         function isOrderCompleted(order) {
-            const status = String(order.status || '').toLocaleLowerCase();
-            return status.includes('مكتمل') || status.includes('تم التسليم') || status.includes('completed');
+            const statusText = [
+                order.status,
+                order.statusLabel,
+                order.deliveryStage
+            ].filter(Boolean).join(' ').toLocaleLowerCase();
+            return statusText.includes('مكتمل')
+                || statusText.includes('تم التوصيل')
+                || statusText.includes('تم التسليم')
+                || statusText.includes('delivered')
+                || statusText.includes('completed');
         }
 
         // استثناء الطلبات الملغاة من إجمالي المبيعات المسجلة.
         function isOrderCancelled(order) {
-            const status = String(order.status || '').toLocaleLowerCase();
-            return status.includes('ملغي') || status.includes('ملغى') || status.includes('cancelled') || status.includes('canceled');
+            const statusText = [
+                order.status,
+                order.statusLabel,
+                order.deliveryStage
+            ].filter(Boolean).join(' ').toLocaleLower();
+            return statusText.includes('ملغي')
+                || statusText.includes('ملغى')
+                || statusText.includes('cancelled')
+                || statusText.includes('canceled');
+        }
+
+        function parseOrderPrice(order) {
+            const rawPrice = order?.totalPrice ?? order?.total ?? order?.unitPrice ?? 0;
+            if (typeof rawPrice === 'string') {
+                const normalized = rawPrice
+                    .replace(/[^\d,.-]/g, '')
+                    .replace(/,/g, '');
+                return Number.parseFloat(normalized);
+            }
+            const numericPrice = Number(rawPrice);
+            return Number.isFinite(numericPrice) ? numericPrice : NaN;
+        }
+
+        function parseOrderRefund(order) {
+            const numericRefund = Number(order?.refundAmount || 0);
+            return Number.isFinite(numericRefund) ? Math.max(0, numericRefund) : 0;
         }
 
         // عرض جدول المنتجات مع حقول تحرير السعر والمخزون.
