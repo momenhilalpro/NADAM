@@ -4415,7 +4415,10 @@
                 order.status,
                 order.statusLabel,
                 order.deliveryStage
-            ].filter(Boolean).join(' ').toLocaleLowerCase();
+            ].filter(value => value !== null && value !== undefined && String(value).trim())
+                .map(value => String(value).trim())
+                .join(' ')
+                .toLocaleLowerCase('ar-EG');
             return statusText.includes('مكتمل')
                 || statusText.includes('تم التوصيل')
                 || statusText.includes('تم التسليم')
@@ -4429,7 +4432,10 @@
                 order.status,
                 order.statusLabel,
                 order.deliveryStage
-            ].filter(Boolean).join(' ').toLocaleLower();
+            ].filter(value => value !== null && value !== undefined && String(value).trim())
+                .map(value => String(value).trim())
+                .join(' ')
+                .toLocaleLowerCase('ar-EG');
             return statusText.includes('ملغي')
                 || statusText.includes('ملغى')
                 || statusText.includes('cancelled')
