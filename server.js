@@ -71,7 +71,6 @@ app.delete('/api/admin/users/:uid', requireAdmin, async (request, response) => {
     }
 });
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 app.use(express.static(path.join(__dirname, 'dist')));
 app.get('/{*path}', (_request, response) => {
     response.sendFile(path.join(__dirname, 'dist', 'index.html'));
