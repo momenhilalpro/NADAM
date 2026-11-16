@@ -1,4 +1,4 @@
-const CACHE_NAME = 'al-nadam-store-v3';
+const CACHE_NAME = 'al-nadam-store-v4';
 const OFFLINE_URL = './offline.html';
 const MAIN_PAGE_URL = './index.html';
 
@@ -42,6 +42,13 @@ self.addEventListener('fetch', event => {
     if (request.method !== 'GET') return;
 
     const url = new URL(request.url);
+    if (url.origin === self.location.origin && (
+        url.pathname.startsWith('/api/') ||
+        url.pathname.startsWith('/@vite/') ||
+        url.pathname.startsWith('/@id/') ||
+        url.pathname.startsWith('/@fs/') ||
+        url.pathname.startsWith('/node_modules/.vite/')
+    )) return;
 
     if (request.mode === 'navigate') {
         event.respondWith((async () => {
@@ -66,12 +73,16 @@ self.addEventListener('fetch', event => {
         event.respondWith((async () => {
             const cached = await caches.match(request);
             if (cached) return cached;
-            const networkResponse = await fetch(request);
-            if (networkResponse.ok) {
-                const cache = await caches.open(CACHE_NAME);
-                await cache.put(request, networkResponse.clone());
+            try {
+                const networkResponse = await fetch(request);
+                if (networkResponse.ok) {
+                    const cache = await caches.open(CACHE_NAME);
+                    await cache.put(request, networkResponse.clone());
+                }
+                return networkResponse;
+            } catch {
+                return new Response('', { status: 503, statusText: 'Offline' });
             }
-            return networkResponse;
         })());
         return;
     }

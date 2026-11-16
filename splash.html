@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#030712">
+    <title>صقر العرب | مملكة الإلكترونيات والتقنية</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes falcon-bounce {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-10px) scale(1.025); }
+        }
+        @keyframes falcon-pulse {
+            0%, 100% { box-shadow: 0 0 32px rgba(245, 158, 11, .2), 0 0 0 5px rgba(245, 158, 11, .08); }
+            50% { box-shadow: 0 0 62px rgba(245, 158, 11, .42), 0 0 0 10px rgba(245, 158, 11, .13); }
+        }
+        @keyframes loading-progress {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+        .falcon-bounce {
+            animation: falcon-bounce 3.2s ease-in-out infinite;
+        }
+        .falcon-frame {
+            animation: falcon-pulse 3.2s ease-in-out infinite;
+        }
+        .loading-progress {
+            animation: loading-progress 10s linear forwards;
+        }
+        #splashScreen.is-fading {
+            opacity: 0;
+            pointer-events: none;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .falcon-bounce, .falcon-frame { animation: none; }
+            .loading-progress { animation: none; width: 100%; }
+            #splashScreen { transition-duration: .01ms; }
+        }
+    </style>
+</head>
+<body class="min-h-screen overflow-hidden bg-gray-950 font-sans text-amber-400">
+    <!-- شاشة الدخول الترحيبية بمتجر صقر العرب -->
+    <main id="splashScreen" class="relative flex min-h-screen items-center justify-center overflow-hidden bg-gray-950 px-5 text-center opacity-100 transition-opacity duration-500">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(245,158,11,0.12),transparent_60%)]" aria-hidden="true"></div>
+        <div class="absolute -right-24 -top-24 h-72 w-72 rounded-full border border-amber-500/10" aria-hidden="true"></div>
+        <div class="absolute -bottom-32 -left-20 h-96 w-96 rounded-full border border-amber-500/10" aria-hidden="true"></div>
+
+        <!-- صورة الصقر مع تأثيرات الحركة والإضاءة -->
+        <div class="relative z-10 mx-auto w-full max-w-3xl">
+            <div class="falcon-frame mx-auto mb-9 flex h-60 w-60 items-center justify-center overflow-hidden rounded-full border-4 border-amber-500 bg-gray-900 ring-4 ring-amber-500/15 sm:h-80 sm:w-80">
+                <img
+                    src="https://images.unsplash.com/photo-1611689342806-0863700ce1e4?w=800&amp;q=85"
+                    alt="صقر يحلق في السماء"
+                    class="falcon-bounce h-full w-full object-cover"
+                    fetchpriority="high"
+                    onerror="this.hidden = true; document.getElementById('falconImageFallback').classList.remove('hidden')"
+                >
+                <div id="falconImageFallback" class="hidden flex h-full w-full items-center justify-center bg-gradient-to-br from-gray-900 via-gray-950 to-amber-950/40" aria-hidden="true">
+                    <svg class="h-40 w-64 text-amber-400/80 sm:h-52 sm:w-80" viewBox="0 0 240 120" fill="currentColor">
+                        <path d="M120 66C98 59 77 36 39 28c17 23 34 39 55 49-27-1-52 8-78 27 38-9 68-7 94 4l10-8 10 8c26-11 56-13 94-4-26-19-51-28-78-27 21-10 38-26 55-49-38 8-59 31-81 38Z"/>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- اسم المتجر ورسالة التحميل -->
+            <h1 class="text-4xl font-black tracking-tight text-amber-400 sm:text-6xl">صقر العرب</h1>
+            <p class="mt-4 text-base font-semibold text-amber-100 sm:text-xl">مملكة الإلكترونيات والتقنية - جارٍ التحميل...</p>
+
+            <!-- نبذة تسويقية عن تجربة التسوق -->
+            <div class="mx-auto mt-6 max-w-2xl rounded-2xl border border-amber-500/25 bg-white/[0.03] px-5 py-4 shadow-[0_12px_40px_rgba(0,0,0,.2)] sm:px-8">
+                <p class="text-sm leading-8 text-amber-100/90 sm:text-base">حيث تلتقي أصالة القمة بقوة التكنولوجيا الحديثة. انطلق معنا في رحلة استثنائية لأحدث الأجهزة، العروض الحصرية، والتقنية التي تستحقها.</p>
+            </div>
+
+            <!-- مؤشر تقدم التحميل -->
+            <div class="mx-auto mt-8 h-1.5 w-56 overflow-hidden rounded-full border border-amber-500/30 bg-white/5 sm:w-72" role="progressbar" aria-label="جارٍ تحميل المتجر">
+                <div class="loading-progress h-full rounded-full bg-amber-400 shadow-[0_0_16px_rgba(245,158,11,.7)]"></div>
+            </div>
+
+            <!-- عداد الثواني المتبقية قبل الانتقال إلى المتجر -->
+            <p id="countdownMessage" class="mt-4 text-xs text-amber-100/70" aria-live="polite" aria-atomic="true">جاري فتح بوابة المتجر خلال ١٠ ثوانٍ...</p>
+        </div>
+
+        <!-- صوت صرخة الصقر -->
+        <audio id="falconScreech" src="https://actions.google.com/sounds/v1/animals/eagle_screech.ogg" autoplay preload="auto"></audio>
+    </main>
+
+    <script>
+        const splashScreen = document.getElementById('splashScreen');
+        const falconScreech = document.getElementById('falconScreech');
+        const countdownElement = document.getElementById('countdownMessage');
+        const redirectDelayMs = 10000;
+        const fadeDurationMs = 500;
+        const redirectAt = Date.now() + redirectDelayMs;
+        let audioStarted = false;
+        let audioPlaybackPending = false;
+        let lastMouseAttemptAt = 0;
+
+        const audioInteractionEvents = ['click', 'mousemove', 'keydown'];
+        const removeAudioInteractionListeners = () => {
+            audioInteractionEvents.forEach(eventName => {
+                document.body.removeEventListener(eventName, retryAudioOnInteraction);
+            });
+        };
+
+        const updateCountdown = () => {
+            const secondsRemaining = Math.max(0, Math.ceil((redirectAt - Date.now()) / 1000));
+            countdownElement.textContent = `جاري فتح بوابة المتجر خلال ${secondsRemaining.toLocaleString('ar-EG')} ثوانٍ...`;
+        };
+
+        const playFalconScreech = async () => {
+            if (audioStarted || audioPlaybackPending) return;
+            audioPlaybackPending = true;
+            try {
+                await falconScreech.play();
+                audioStarted = true;
+                removeAudioInteractionListeners();
+            } catch {
+                audioPlaybackPending = false;
+            } finally {
+                audioPlaybackPending = false;
+            }
+        };
+
+        const retryAudioOnInteraction = event => {
+            if (event.type === 'mousemove') {
+                const now = Date.now();
+                if (now - lastMouseAttemptAt < 500) return;
+                lastMouseAttemptAt = now;
+            }
+            playFalconScreech();
+        };
+
+        audioInteractionEvents.forEach(eventName => {
+            document.body.addEventListener(eventName, retryAudioOnInteraction, { passive: true });
+        });
+        playFalconScreech();
+        updateCountdown();
+        const countdownTimer = window.setInterval(updateCountdown, 250);
+
+        window.setTimeout(() => {
+            splashScreen.classList.add('is-fading');
+        }, redirectDelayMs - fadeDurationMs);
+
+        window.setTimeout(() => {
+            window.clearInterval(countdownTimer);
+            window.location.replace('./index.html');
+        }, redirectDelayMs);
+    </script>
+</body>
+</html>
