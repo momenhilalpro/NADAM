@@ -98,13 +98,19 @@
             countdownElement.textContent = `جاري فتح بوابة المتجر خلال ${secondsRemaining.toLocaleString('ar-EG')} ثوانٍ...`;
         };
 
-        welcomeSound.play().catch(error => {
-            if (error?.name === 'NotAllowedError') {
-                console.warn('The browser blocked automatic welcome audio playback.');
-                return;
-            }
-            console.error('Unable to play the welcome sound:', error);
-        });
+        const playWelcomeSound = () => {
+            if (!welcomeSound.paused) return;
+            welcomeSound.play().catch(error => {
+                if (error?.name === 'NotAllowedError') {
+                    console.warn('The browser blocked automatic welcome audio playback.');
+                    return;
+                }
+                console.error('Unable to play the welcome sound:', error);
+            });
+        };
+
+        playWelcomeSound();
+        document.addEventListener('pointerdown', playWelcomeSound, { once: true });
         updateCountdown();
         const countdownTimer = window.setInterval(updateCountdown, 250);
 
