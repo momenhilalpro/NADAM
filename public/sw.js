@@ -1,9 +1,11 @@
-const CACHE_NAME = 'al-nadam-store-v4';
+const CACHE_NAME = 'al-nadam-store-v5';
 const OFFLINE_URL = './offline.html';
 const MAIN_PAGE_URL = './index.html';
+const WELCOME_PAGE_URL = './splash.html';
 
 const CORE_ASSETS = [
     MAIN_PAGE_URL,
+    WELCOME_PAGE_URL,
     OFFLINE_URL,
     '/falcon-logo.svg',
     '/favicon.svg',
@@ -40,6 +42,7 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
     const request = event.request;
     if (request.method !== 'GET') return;
+    if (request.destination === 'audio' || request.headers.has('range')) return;
 
     const url = new URL(request.url);
     if (url.origin === self.location.origin && (

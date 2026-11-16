@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>صقر العرب | متجر الإلكترونيات واللابتوبات</title>
+    <script>
+        if (window.location.pathname === '/') {
+            window.location.replace(new URL('./splash.html', window.location.href).href);
+        }
+    </script>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="/styles.css">
     <!-- Google Fonts: Cairo -->
@@ -820,7 +825,7 @@
 }
     </style>
 </head>
-<body class="bg-amazon-lightBg text-gray-900 min-h-screen flex flex-col justify-between selection:bg-amazon-yellow selection:text-amazon-navy">
+<body class="bg-gray-50 text-gray-900 min-h-screen flex flex-col justify-between selection:bg-amazon-yellow selection:text-amazon-navy">
 
     <!-- Toast Notification Container -->
     <div id="toastContainer" class="fixed top-20 left-4 right-4 sm:left-5 sm:right-auto z-[90] flex flex-col gap-2 w-auto sm:w-96 max-w-sm" aria-live="polite" aria-atomic="false"></div>
@@ -841,13 +846,13 @@
 
             <!-- Brand Logo -->
             <button type="button" class="group flex shrink-0 items-center gap-2 rounded-lg p-1 text-right" onclick="navigateTo('home')" aria-label="الانتقال إلى الرئيسية - صقر العرب">
-                <span class="relative flex items-center gap-2 rounded-lg border border-amazon-orange/50 bg-gradient-to-l from-amazon-orange via-[#f6c453] to-amazon-yellow px-2 py-1.5 text-amazon-navy shadow-[0_0_18px_rgba(255,153,0,.25)] transition group-hover:shadow-[0_0_26px_rgba(255,153,0,.48)] sm:px-3">
-                    <span class="flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-full border border-amazon-yellow/70 bg-amazon-navy shadow-[0_0_14px_rgba(255,189,0,.38)]">
+                <span class="store-brand-lockup relative flex items-center gap-2 rounded-lg border border-amazon-orange/50 bg-gradient-to-l from-amazon-orange via-[#f6c453] to-amazon-yellow px-2 py-1.5 text-amazon-navy shadow-[0_0_18px_rgba(255,153,0,.25)] transition group-hover:shadow-[0_0_26px_rgba(255,153,0,.48)] sm:px-3">
+                        <span class="store-brand-mark flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-full border border-amazon-yellow/70 bg-amazon-navy shadow-[0_0_14px_rgba(255,189,0,.38)]">
                         <img src="/falcon-logo.svg" alt="شعار صقر العرب" class="falcon-logo-image" width="50" height="50" loading="eager">
                     </span>
                     <span class="min-w-0 text-right leading-none">
-                        <span class="block whitespace-nowrap text-base font-black tracking-normal text-amazon-navy sm:text-xl md:text-2xl">صقر العرب</span>
-                        <span class="hidden whitespace-nowrap text-[8px] font-black text-amazon-navy/70 sm:block md:text-[9px]">مملكة الإلكترونيات والتقنية</span>
+                            <span class="store-brand-title block whitespace-nowrap text-base font-black tracking-normal text-amazon-navy sm:text-xl md:text-2xl">صقر العرب</span>
+                            <span class="store-brand-subtitle hidden whitespace-nowrap text-[8px] font-black text-amazon-navy/70 sm:block md:text-[9px]">مملكة الإلكترونيات والتقنية</span>
                     </span>
                 </span>
             </button>
@@ -887,7 +892,7 @@
                         </div>
                     </summary>
                     <div class="absolute left-1/2 top-[calc(100%+0.25rem)] z-50 w-[min(13rem,calc(100vw-2rem))] -translate-x-1/2 overflow-hidden rounded-lg border border-white/10 bg-[#1d2935] p-2 text-right shadow-2xl" dir="rtl">
-                        <button type="button" onclick="navigateTo('crm')" class="flex min-h-11 w-full items-center gap-2 rounded px-3 text-right text-xs font-bold hover:bg-white/10"><i class="fa-solid fa-user w-4 text-amazon-yellow"></i>لوحة العميل / CRM</button>
+                        <button type="button" onclick="navigateTo('crm')" class="flex min-h-11 w-full items-center gap-2 rounded px-3 text-right text-xs font-bold hover:bg-white/10"><i class="fa-solid fa-user w-4 text-amazon-yellow"></i>لوحة العميل </button>
                         <button id="authOpenButton" type="button" onclick="openAuthModal()" class="flex min-h-11 w-full items-center gap-2 rounded px-3 text-right text-xs font-bold text-amazon-yellow hover:bg-white/10"><i class="fa-solid fa-right-to-bracket w-4"></i>تسجيل الدخول</button>
                         <button type="button" onclick="navigateTo('admin')" class="hidden min-h-11 w-full items-center gap-2 rounded px-3 text-right text-xs font-bold text-emerald-300 hover:bg-white/10 admin-dropdown-link"><i class="fa-solid fa-chart-line w-4"></i>لوحة الإدارة</button>
                     </div>
@@ -941,7 +946,7 @@
         </div>
 
         <!-- شريط بحث مستقل أسفل الشريط الرئيسي لتسهيل الوصول إليه على كل أحجام الشاشات. -->
-        <div class="border-b border-gray-200 bg-white/95 px-3 py-2 backdrop-blur-md shadow-[0_8px_20px_rgba(15,23,42,.08)]">
+        <div class="store-search-row border-b border-gray-200 bg-white/95 px-3 py-2 backdrop-blur-md shadow-[0_8px_20px_rgba(15,23,42,.08)]">
             <div class="mx-auto flex max-w-7xl items-center gap-2">
                 <div class="flex min-h-11 min-w-0 flex-1 items-center overflow-hidden rounded-full border border-gray-300 bg-white shadow-sm transition focus-within:border-amazon-orange focus-within:ring-4 focus-within:ring-amazon-orange/10">
                     <select id="searchCategorySelect" onchange="filterProducts()" aria-label="تصفية البحث حسب القسم" class="hidden h-full bg-gray-50 px-3 text-xs font-bold text-gray-800 outline-none md:block">
@@ -971,7 +976,7 @@
         </div>
 
         <!-- Sub-Header Secondary Bar -->
-        <div class="relative z-10 min-h-10 border-t border-white/5 bg-amazon-lightNavy/95 px-4 py-1 text-xs text-white shadow-inner backdrop-blur-md">
+        <div class="store-category-nav relative z-10 min-h-10 border-t border-white/5 bg-amazon-lightNavy/95 px-4 py-1 text-xs text-white shadow-inner backdrop-blur-md">
             <div class="hide-scroll-bar mx-auto flex min-h-8 max-w-7xl items-center gap-5 overflow-x-auto whitespace-nowrap py-0.5 sm:gap-6">
                 <button id="megaMenuButton" type="button" onclick="toggleMegaMenu()" aria-expanded="false" aria-controls="megaMenuPanel" class="hidden min-h-8 shrink-0 items-center gap-2 rounded-md bg-white/10 px-3 font-black text-amazon-yellow transition hover:bg-amazon-yellow hover:text-amazon-navy lg:flex">
                     <i class="fa-solid fa-bars-staggered text-sm" aria-hidden="true"></i> الفئات <i class="fa-solid fa-chevron-down text-[9px]" aria-hidden="true"></i>
@@ -998,16 +1003,13 @@
                     <i class="fa-solid fa-heart"></i> المفضلة
                 </button>
                 <button onclick="navigateTo('crm')" class="hover:text-amazon-yellow font-bold text-amazon-yellow flex items-center gap-1">
-                    <i class="fa-solid fa-id-card"></i> لوحة CRM
+                    <i class="fa-solid fa-id-card"></i> لوحة العميل
                 </button>
                 <button id="adminNavButton" onclick="navigateTo('admin')" class="hidden hover:text-amazon-yellow font-bold text-emerald-300 flex items-center gap-1">
                     <i class="fa-solid fa-chart-line"></i> لوحة الإدارة
                 </button>
             </div>
-            <!-- <div class="hidden lg:flex items-center gap-2 text-amazon-yellow font-extrabold">
-                <i class="fa-brands fa-whatsapp text-green-400 text-sm"></i>
-                <span>خدمة العميل الفورية والطلب المباشر: 01024863950</span>
-            </div> -->
+           
         </div>
 
         <div id="megaMenuBackdrop" class="fixed inset-x-0 bottom-0 top-[13rem] z-[39] hidden bg-black/45 backdrop-blur-[2px]" onclick="closeMegaMenu()"></div>
@@ -1062,38 +1064,49 @@
     </header>
 
     <!-- MAIN SPA ROUTER CONTAINER -->
-    <main class="flex-grow max-w-7xl w-full mx-auto p-3 md:p-5">
+    <main class="store-main flex-grow w-full mx-auto">
 
         <!-- ================= PAGE 1: HOME CATALOG & AMAZON DEALS ================= -->
         <section id="page-home" class="page-tab active space-y-6">
             
             <!-- Hero Carousel Banner -->
-            <div class="relative bg-gradient-to-l from-amazon-navy via-amazon-lightNavy to-gray-900 rounded-lg overflow-hidden shadow-md text-white p-6 md:p-10 border border-gray-700">
-                <div class="max-w-2xl space-y-3 relative z-10">
-                    <div class="flex items-center gap-2">
-                        <span class="bg-amazon-redDeal text-white font-extrabold text-[11px] px-2.5 py-0.5 rounded uppercase tracking-wider">عروض المهرجان الأكبر</span>
-                        <span class="text-xs text-amazon-yellow font-bold"><i class="fa-regular fa-clock ml-1"></i> ينتهي العرض الخاطف خلال: <span id="dealTimer">--:--:--</span></span>
+            <div class="store-home-hero">
+                <div class="store-home-hero-copy">
+                    <div class="store-home-hero-kicker">
+                        <span class="store-home-hero-label">صقر العرب <span aria-hidden="true">/</span> عالمك التقني</span>
+                        <span class="store-home-hero-timer"><i class="fa-regular fa-clock ml-1" aria-hidden="true"></i> ينتهي العرض خلال <strong id="dealTimer">--:--:--</strong></span>
                     </div>
-                    <h1 class="text-2xl md:text-4xl font-black leading-tight text-white">تخفيضات أجهزة الذكاء الاصطناعي والإلكترونيات </h1>
-                    <p class="text-gray-300 text-xs md:text-sm">   مع أكثر من 7 وسائل دفع وسداد تقسيط، و5 شركات شحن، وتأكيد فوري للطلب عبر الواتساب.</p>
-                    <button id="heroLoginPromotion" type="button" onclick="openAuthModal()" class="login-promo-banner mt-1 flex w-full max-w-xl items-center justify-between gap-3 rounded-lg border border-amazon-yellow/80 px-4 py-3 text-right shadow-[0_0_24px_rgba(254,189,105,.22)] sm:px-5" aria-label="تسجيل الدخول والاستفادة من مميزات متجر الندم">
+                    <h1 class="store-home-hero-title">تقنية أقرب إلى <span>أسلوب حياتك.</span></h1>
+                    <p class="store-home-hero-description">اكتشف أجهزة وإكسسوارات مختارة، قارن المواصفات بسهولة، واختر ما يناسب يومك وميزانيتك.</p>
+                    <div class="store-home-hero-actions">
+                        <button type="button" onclick="navigateTo('catalog')" class="store-home-primary">تصفّح المنتجات <i class="fa-solid fa-arrow-left mr-2" aria-hidden="true"></i></button>
+                        <button type="button" onclick="openAiChat()" class="store-home-secondary"><i class="fa-solid fa-robot ml-2" aria-hidden="true"></i>اسأل المساعد الذكي</button>
+                    </div>
+                    <button id="heroLoginPromotion" type="button" onclick="openAuthModal()" class="login-promo-banner mt-6 flex w-full max-w-xl items-center justify-between gap-3 rounded-lg border border-amazon-yellow/80 px-4 py-3 text-right shadow-[0_0_24px_rgba(254,189,105,.22)] sm:px-5" aria-label="تسجيل الدخول والاستفادة من مميزات متجر الندم">
                         <span class="flex min-w-0 items-center gap-3">
                             <span class="login-promo-icon flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-amazon-yellow text-amazon-navy"><i class="fa-solid fa-user-plus text-lg" aria-hidden="true"></i></span>
                             <span class="min-w-0">
-                                <span class="block text-sm font-black text-white sm:text-base">سجّل الدخول لتحصل على أفضل مميزاتنا</span>
-                                <span class="mt-0.5 block text-[10px] font-bold text-amber-100 sm:text-xs">المفضلة • عروض حصرية • نقاط ولاء • تتبع الطلبات</span>
+                                <span class="block text-sm font-black text-white sm:text-base">سجّل الدخول لمزايا متجرك</span>
+                                <span class="mt-0.5 block text-[10px] font-bold text-amber-100 sm:text-xs">المفضلة • عروض خاصة • نقاط ولاء • متابعة الطلبات</span>
                             </span>
                         </span>
-                        <span class="login-promo-cta min-h-11 shrink-0 rounded-md bg-amazon-yellow px-3 py-2 text-xs font-black text-amazon-navy sm:px-5 sm:text-sm">سجل الآن <i class="fa-solid fa-arrow-left mr-1" aria-hidden="true"></i></span>
+                        <span class="login-promo-cta min-h-11 shrink-0 rounded-md bg-amazon-yellow px-3 py-2 text-xs font-black text-amazon-navy sm:px-5 sm:text-sm">حسابي <i class="fa-solid fa-arrow-left mr-1" aria-hidden="true"></i></span>
                     </button>
-                    <div class="pt-2 flex flex-wrap gap-3">
-                        <button onclick="navigateTo('catalog')" class="bg-amazon-orange hover:bg-amazon-orangeHover text-amazon-navy font-black px-6 py-2.5 rounded shadow-md transition duration-200 text-xs md:text-sm">تصفح المنتجات بالكامل</button>
-                        <button onclick="openAiChat()" class="bg-white hover:bg-gray-100 text-amazon-navy font-extrabold px-4 py-2.5 rounded shadow transition duration-200 text-xs md:text-sm flex items-center gap-2">
-                            <i class="fa-solid fa-robot text-amazon-orange"></i> تكلّم مع مؤمن الذكي
-                        </button>
+                    <div class="store-home-trust-row">
+                        <span><i class="fa-solid fa-truck-fast" aria-hidden="true"></i> شحن لجميع المحافظات</span>
+                        <span><i class="fa-solid fa-wallet" aria-hidden="true"></i> خيارات دفع متعددة</span>
+                        <span><i class="fa-solid fa-headset" aria-hidden="true"></i> مساعدة وقت الحاجة</span>
                     </div>
                 </div>
-                <i class="fa-solid fa-microchip absolute -left-10 -bottom-10 text-9xl text-white opacity-10 hidden sm:block"></i>
+                <div class="store-home-hero-art" aria-hidden="true">
+                    <div class="store-home-hero-orbit">
+                        <div class="store-home-hero-mark">
+                            <img src="/falcon-logo.svg" alt="" width="220" height="220" loading="eager">
+                        </div>
+                    </div>
+                    <div class="store-home-float-card store-home-float-card-top"><i class="fa-solid fa-microchip"></i><span>اختيارات تقنية<br><strong>في مكان واحد</strong></span></div>
+                    <div class="store-home-float-card store-home-float-card-bottom"><i class="fa-solid fa-shield-halved"></i><span>تسوّق بثقة<br><strong>واختر على راحتك</strong></span></div>
+                </div>
             </div>
 
             <!-- AI Product Recommendation Engine -->
@@ -1183,8 +1196,8 @@
             </section>
 
             <!-- Amazon-style Electronics Deal Carousels -->
-            <section id="flashSaleSection" class="overflow-hidden rounded-lg border border-red-100 bg-white shadow-sm">
-                <div class="flex min-h-14 items-center justify-between gap-3 bg-[#e60023] px-4 py-3 text-white md:px-5">
+            <section id="flashSaleSection" class="store-deal-section overflow-hidden rounded-lg border border-red-100 bg-white shadow-sm">
+                <div class="store-deal-heading flex min-h-14 items-center justify-between gap-3 bg-[#e60023] px-4 py-3 text-white md:px-5">
                     <div class="min-w-0">
                         <h2 class="truncate text-sm font-black sm:text-lg">🔥 عروض 11.11 | الإلكترونيات واللابتوبات | خصم يصل إلى 50%</h2>
                         <p class="mt-0.5 hidden text-[11px] text-white/80 sm:block">اختيارات مختارة من اللابتوبات والشاشات وملحقات القيمنق</p>
@@ -1199,8 +1212,8 @@
                 </div>
             </section>
 
-            <section class="overflow-hidden rounded-lg border border-orange-100 bg-white shadow-sm">
-                <div class="flex min-h-14 items-center justify-between gap-3 bg-[#e60023] px-4 py-3 text-white md:px-5">
+            <section class="store-deal-section overflow-hidden rounded-lg border border-orange-100 bg-white shadow-sm">
+                <div class="store-deal-heading flex min-h-14 items-center justify-between gap-3 bg-[#e60023] px-4 py-3 text-white md:px-5">
                     <div class="min-w-0">
                         <h2 class="truncate text-sm font-black sm:text-lg">⚡ صفقات اليوم | الهواتف والإكسسوارات | خصم يصل إلى 40%</h2>
                         <p class="mt-0.5 hidden text-[11px] text-white/80 sm:block">هواتف وسماعات وساعات وشواحن اختيرت بعناية</p>
@@ -1219,38 +1232,38 @@
 
             <!-- Featured Categories Highlights Grid -->
             <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
-                <div onclick="setCategoryFilter('laptops'); navigateTo('catalog');" class="bg-white p-3 rounded-lg border border-gray-200 text-center cursor-pointer hover:shadow-md transition">
+                <button type="button" onclick="setCategoryFilter('laptops'); navigateTo('catalog');" class="home-category-card bg-white p-3 rounded-lg border border-gray-200 text-center cursor-pointer hover:shadow-md transition">
                     <i class="fa-solid fa-laptop text-2xl text-amazon-orange mb-1"></i>
-                    <h4 class="font-bold text-xs text-amazon-navy">لابتوبات</h4>
-                </div>
-                <div onclick="setCategoryFilter('phones'); navigateTo('catalog');" class="bg-white p-3 rounded-lg border border-gray-200 text-center cursor-pointer hover:shadow-md transition">
+                    <span class="block font-bold text-xs text-amazon-navy">لابتوبات</span>
+                </button>
+                <button type="button" onclick="setCategoryFilter('phones'); navigateTo('catalog');" class="home-category-card bg-white p-3 rounded-lg border border-gray-200 text-center cursor-pointer hover:shadow-md transition">
                     <i class="fa-solid fa-mobile-screen-button text-2xl text-amazon-orange mb-1"></i>
-                    <h4 class="font-bold text-xs text-amazon-navy">هواتف</h4>
-                </div>
-                <div onclick="setCategoryFilter('monitors'); navigateTo('catalog');" class="bg-white p-3 rounded-lg border border-gray-200 text-center cursor-pointer hover:shadow-md transition">
+                    <span class="block font-bold text-xs text-amazon-navy">هواتف</span>
+                </button>
+                <button type="button" onclick="setCategoryFilter('monitors'); navigateTo('catalog');" class="home-category-card bg-white p-3 rounded-lg border border-gray-200 text-center cursor-pointer hover:shadow-md transition">
                     <i class="fa-solid fa-desktop text-2xl text-amazon-orange mb-1"></i>
-                    <h4 class="font-bold text-xs text-amazon-navy">شاشات</h4>
-                </div>
-                <div onclick="setCategoryFilter('audio'); navigateTo('catalog');" class="bg-white p-3 rounded-lg border border-gray-200 text-center cursor-pointer hover:shadow-md transition">
+                    <span class="block font-bold text-xs text-amazon-navy">شاشات</span>
+                </button>
+                <button type="button" onclick="setCategoryFilter('audio'); navigateTo('catalog');" class="home-category-card bg-white p-3 rounded-lg border border-gray-200 text-center cursor-pointer hover:shadow-md transition">
                     <i class="fa-solid fa-headphones text-2xl text-amazon-orange mb-1"></i>
-                    <h4 class="font-bold text-xs text-amazon-navy">سماعات</h4>
-                </div>
-                <div onclick="setCategoryFilter('gaming'); navigateTo('catalog');" class="bg-white p-3 rounded-lg border border-gray-200 text-center cursor-pointer hover:shadow-md transition">
+                    <span class="block font-bold text-xs text-amazon-navy">سماعات</span>
+                </button>
+                <button type="button" onclick="setCategoryFilter('gaming'); navigateTo('catalog');" class="home-category-card bg-white p-3 rounded-lg border border-gray-200 text-center cursor-pointer hover:shadow-md transition">
                     <i class="fa-solid fa-gamepad text-2xl text-amazon-orange mb-1"></i>
-                    <h4 class="font-bold text-xs text-amazon-navy">جيمينج</h4>
-                </div>
-                <div onclick="setCategoryFilter('cameras'); navigateTo('catalog');" class="bg-white p-3 rounded-lg border border-gray-200 text-center cursor-pointer hover:shadow-md transition">
+                    <span class="block font-bold text-xs text-amazon-navy">جيمينج</span>
+                </button>
+                <button type="button" onclick="setCategoryFilter('cameras'); navigateTo('catalog');" class="home-category-card bg-white p-3 rounded-lg border border-gray-200 text-center cursor-pointer hover:shadow-md transition">
                     <i class="fa-solid fa-camera text-2xl text-amazon-orange mb-1"></i>
-                    <h4 class="font-bold text-xs text-amazon-navy">كاميرات</h4>
-                </div>
-                <div onclick="setCategoryFilter('smarthome'); navigateTo('catalog');" class="bg-white p-3 rounded-lg border border-gray-200 text-center cursor-pointer hover:shadow-md transition">
+                    <span class="block font-bold text-xs text-amazon-navy">كاميرات</span>
+                </button>
+                <button type="button" onclick="setCategoryFilter('smarthome'); navigateTo('catalog');" class="home-category-card bg-white p-3 rounded-lg border border-gray-200 text-center cursor-pointer hover:shadow-md transition">
                     <i class="fa-solid fa-house-signal text-2xl text-amazon-orange mb-1"></i>
-                    <h4 class="font-bold text-xs text-amazon-navy">منزل ذكي</h4>
-                </div>
-                <div onclick="setCategoryFilter('cables'); navigateTo('catalog');" class="bg-white p-3 rounded-lg border border-gray-200 text-center cursor-pointer hover:shadow-md transition">
+                    <span class="block font-bold text-xs text-amazon-navy">منزل ذكي</span>
+                </button>
+                <button type="button" onclick="setCategoryFilter('cables'); navigateTo('catalog');" class="home-category-card bg-white p-3 rounded-lg border border-gray-200 text-center cursor-pointer hover:shadow-md transition">
                     <i class="fa-solid fa-charging-station text-2xl text-amazon-orange mb-1"></i>
-                    <h4 class="font-bold text-xs text-amazon-navy">شواحن</h4>
-                </div>
+                    <span class="block font-bold text-xs text-amazon-navy">شواحن</span>
+                </button>
             </div>
 
             <!-- Featured Products Preview Grid -->
@@ -1299,7 +1312,7 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div class="catalog-layout grid grid-cols-1 lg:grid-cols-4 gap-6">
                 <!-- Sidebar Filters -->
                 <div class="h-fit space-y-5 rounded-xl border border-slate-700/60 bg-slate-900 p-4 text-xs shadow-lg">
                     <div>
@@ -2533,7 +2546,7 @@
             <div class="grid grid-cols-1 gap-9 border-b border-amber-500/15 pb-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
                 <section aria-labelledby="footer-brand-title">
                     <a href="./index.html" onclick="navigateTo('home'); return false;" class="mb-4 inline-flex items-center gap-3">
-                        <span class="flex h-12 w-12 items-center justify-center rounded-xl border border-amber-500/30 bg-gradient-to-br from-amber-400/20 to-white/5 text-2xl font-black text-amber-300 shadow-[0_0_24px_rgba(245,158,11,.12)]" aria-hidden="true">ص</span>
+                        <img src="/falcon-logo.svg" alt="شعار صقر العرب" class="falcon-img-icon" width="50" height="50" loading="eager">
                         <span id="footer-brand-title" class="text-xl font-black text-white">صقر العرب</span>
                     </a>
                     <p class="leading-7 text-slate-400">وجهتك الموثوقة للإلكترونيات الأصلية، مع اختيارات تقنية مدروسة وتجربة شراء واضحة من أول زيارة حتى استلام طلبك.</p>
@@ -2571,7 +2584,7 @@
                             <i class="fa-brands fa-instagram" aria-hidden="true"></i>
                         </a>
                         <a
-                            href="https://wa.me/201024683950"
+                            href="https://wa.me/201096429739"
                             target="_blank"
                             rel="noopener noreferrer"
                             aria-label="واتساب"
@@ -2651,7 +2664,7 @@
                             <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-400/10 text-amber-400">
                                 <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
                             </span>
-                            <span><small class="block text-[10px] text-slate-500">الموقع</small>مصر، سوهاج</span>
+                            <span><small class="block text-[10px] text-slate-500">الموقع</small>مصر، قنا</span>
                         </li>
                         <li class="flex items-center gap-3 rounded-xl border border-white/[0.07] bg-white/[0.03] p-3 transition-colors hover:border-amber-500/25 hover:bg-white/[0.05]">
                             <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-400/10 text-amber-400">
@@ -2671,7 +2684,7 @@
                             <span class="min-w-0">
                                 <small class="block text-[10px] text-slate-500">البريد الإلكتروني</small>
                                 <a href="mailto:support@alnadam.store" dir="ltr" class="break-all transition-colors hover:text-amber-400">
-                                    support@alnadam.store
+                                   momenhilal6942@gmail.com
                                 </a>
                             </span>
                         </li>
@@ -2744,7 +2757,7 @@
                     <div class="absolute -top-2 left-1/2 z-10 -translate-x-1/2 text-3xl text-red-600"><i class="fa-solid fa-caret-down"></i></div>
                     <div id="spinWheelDisk" class="spin-wheel relative h-full w-full rounded-full border-8 border-amazon-navy shadow-lg">
                         <span class="absolute right-7 top-10 rotate-45 text-xs font-black text-white">خصم 5٪</span>
-                        <span class="absolute bottom-8 left-1/2 -translate-x-1/2 text-xs font-black text-amazon-navy"> حظ اوفر</span>
+                        <span class="absolute bottom-8 left-1/2 -translate-x-1/2 text-xs font-black text-amazon-navy"> خصم 15%</span>
                         <span class="absolute left-5 top-10 -rotate-45 text-xs font-black text-white">شحن مجاني</span>
                     </div>
                 </div>
@@ -3127,9 +3140,10 @@
 
         function initPremiumHeader() {
             const announcements = [
-                '🚚 توصيل سريع لجميع المحافظات',
-                '🎁 خصومات تصل إلى 30%',
-                '💳 إمكانية التقسيط والدفع عند الاستلام'
+                ' توصيل سريع لجميع المحافظات',
+                ' خصومات تصل إلى 30%',
+                ' إمكانية التقسيط والدفع عند الاستلام',
+                'عروض وخصومات مستمره'
             ];
             const text = document.getElementById('announcementText');
             let announcementIndex = 0;
@@ -4442,35 +4456,34 @@
             }
 
             grid.innerHTML = pageItems.map(product => `
-                <article class="phone-card flex flex-col gap-4 rounded-2xl p-4 text-white sm:p-5">
-                    <div class="flex min-w-0 items-start gap-3">
-                        <button type="button" onclick="openProductModal(${product.id})" class="h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-slate-700 bg-slate-800" aria-label="عرض ${escapeHtml(product.name)}">
-                            <img src="${escapeHtml(product.img)}" alt="${escapeHtml(product.name)}" loading="lazy" class="h-12 w-12 rounded-lg object-cover">
+                <article class="phone-card catalog-product-card">
+                    <div class="catalog-product-media">
+                        <button type="button" onclick="openProductModal(${product.id})" class="catalog-product-image-button" aria-label="عرض ${escapeHtml(product.name)}">
+                            <img src="${escapeHtml(product.img)}" alt="${escapeHtml(product.name)}" loading="lazy" class="catalog-product-image">
                         </button>
-                        <div class="min-w-0 flex-1">
-                            <h3 onclick="openProductModal(${product.id})" class="line-clamp-2 cursor-pointer text-sm font-black text-white transition hover:text-amber-400">${escapeHtml(product.name)}</h3>
-                            <span class="mt-2 inline-flex max-w-full truncate rounded-full border border-amber-400/20 bg-amber-400/10 px-2.5 py-1 text-[10px] font-bold text-amber-300">${escapeHtml(getCatalogCategoryLabel(product.category))}</span>
+                        <span class="catalog-product-category">${escapeHtml(getCatalogCategoryLabel(product.category))}</span>
+                        <div class="catalog-product-wishlist">${renderWishlistButton(product.id, 'h-10 w-10 border border-white bg-white text-pink-500 shadow-sm')}</div>
+                    </div>
+                    <div class="catalog-product-body">
+                        <button type="button" onclick="openProductModal(${product.id})" class="catalog-product-title">${escapeHtml(product.name)}</button>
+                        <p class="catalog-product-specs">${escapeHtml(product.specs)}</p>
+                        <div class="catalog-product-price-row">
+                            <strong class="catalog-product-price">${getEffectiveProductPrice(product).toLocaleString('ar-EG', { maximumFractionDigits: 2 })} ج.م.</strong>
+                            <span class="catalog-stock-pill ${product.stock > 0 ? 'catalog-stock-available' : 'catalog-stock-empty'}">
+                                <span></span>${product.stock > 0 ? 'متوفر' : 'نفدت الكمية'}
+                            </span>
                         </div>
-                        <div class="shrink-0">${renderWishlistButton(product.id, 'h-9 w-9 border border-slate-700 bg-slate-950/60 text-pink-300')}</div>
-                    </div>
-                    <p class="line-clamp-2 min-h-10 text-xs leading-5 text-slate-400">${escapeHtml(product.specs)}</p>
-                    <div class="flex flex-wrap items-center justify-between gap-2 border-t border-slate-700/70 pt-3">
-                        <strong class="text-lg font-black text-amber-400">${getEffectiveProductPrice(product).toLocaleString('ar-EG', { maximumFractionDigits: 2 })} ج.م.</strong>
-                        <span class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-black ${product.stock > 0 ? 'border-emerald-400/20 bg-emerald-500/10 text-emerald-300' : 'border-red-400/20 bg-red-500/10 text-red-300'}">
-                            <span class="h-1.5 w-1.5 rounded-full ${product.stock > 0 ? 'bg-emerald-400' : 'bg-red-400'}"></span>
-                            ${product.stock > 0 ? 'متوفر' : 'نفدت الكمية'}
-                        </span>
-                    </div>
-                    <div class="mt-auto grid grid-cols-2 gap-2">
-                        <button type="button" onclick="addToCart(${product.id})" ${product.stock <= 0 ? 'disabled' : ''} class="col-span-2 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-amber-500 px-3 py-2.5 text-xs font-black text-slate-950 shadow-[0_0_20px_rgba(245,158,11,.22)] transition hover:bg-amber-400 hover:shadow-[0_0_26px_rgba(245,158,11,.36)] active:scale-[.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none">
-                            <i class="fa-solid fa-cart-plus" aria-hidden="true"></i> إضافة إلى السلة
-                        </button>
-                        <button type="button" onclick="addToCompare(${product.id})" class="flex min-h-10 items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-950/60 px-2 text-[11px] font-bold text-slate-200 transition hover:border-amber-400/60 hover:text-amber-300" aria-label="إضافة ${escapeHtml(product.name)} إلى المقارنة">
-                            <i class="fa-solid fa-code-compare text-amber-400" aria-hidden="true"></i> إضافة للمقارنة
-                        </button>
-                        <button type="button" onclick="openProductModal(${product.id})" class="flex min-h-10 items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-950/60 px-2 text-[11px] font-bold text-slate-200 transition hover:border-amber-400/60 hover:text-amber-300">
-                            <i class="fa-regular fa-eye text-slate-400" aria-hidden="true"></i> عرض التفاصيل
-                        </button>
+                        <div class="catalog-product-actions">
+                            <button type="button" onclick="addToCart(${product.id})" ${product.stock <= 0 ? 'disabled' : ''} class="catalog-add-to-cart" aria-label="إضافة ${escapeHtml(product.name)} إلى السلة">
+                                <i class="fa-solid fa-cart-plus" aria-hidden="true"></i> إضافة إلى السلة
+                            </button>
+                            <button type="button" onclick="addToCompare(${product.id})" class="catalog-secondary-action" aria-label="إضافة ${escapeHtml(product.name)} إلى المقارنة">
+                                <i class="fa-solid fa-code-compare" aria-hidden="true"></i> مقارنة
+                            </button>
+                            <button type="button" onclick="openProductModal(${product.id})" class="catalog-secondary-action">
+                                <i class="fa-regular fa-eye" aria-hidden="true"></i> التفاصيل
+                            </button>
+                        </div>
                     </div>
                 </article>
             `).join('');
