@@ -1,4 +1,4 @@
-const CACHE_NAME = 'al-nadam-store-v5';
+const CACHE_NAME = 'al-nadam-store-v6';
 const OFFLINE_URL = './offline.html';
 const MAIN_PAGE_URL = './index.html';
 const WELCOME_PAGE_URL = './splash.html';

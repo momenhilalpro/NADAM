@@ -79,7 +79,6 @@
 
             <!-- عداد الثواني المتبقية قبل الانتقال إلى المتجر -->
             <p id="countdownMessage" class="mt-4 text-xs text-amber-100/70" aria-live="polite" aria-atomic="true">جاري فتح بوابة المتجر خلال 5 ثوانٍ...</p>
-            <button id="playWelcomeSound" type="button" class="hidden mt-5 rounded-full border border-amber-400/50 px-5 py-2 text-sm font-bold text-amber-200 transition hover:bg-amber-400/10 focus:outline-none focus:ring-2 focus:ring-amber-400">اضغط لتشغيل صوت التنبيه</button>
         </div>
 
         <!-- صوت التنبيه الترحيبي -->
@@ -90,40 +89,22 @@
         const splashScreen = document.getElementById('splashScreen');
         const welcomeSound = document.getElementById('welcomeSound');
         const countdownElement = document.getElementById('countdownMessage');
-        const playWelcomeSoundButton = document.getElementById('playWelcomeSound');
-        const redirectDelayMs = 3000;
+        const redirectDelayMs = 5000;
         const fadeDurationMs = 500;
         const redirectAt = Date.now() + redirectDelayMs;
-        let audioStarted = false;
-        let audioPlaybackPending = false;
 
         const updateCountdown = () => {
             const secondsRemaining = Math.max(0, Math.ceil((redirectAt - Date.now()) / 1000));
             countdownElement.textContent = `جاري فتح بوابة المتجر خلال ${secondsRemaining.toLocaleString('ar-EG')} ثوانٍ...`;
         };
 
-        const playWelcomeSound = async () => {
-            if (audioStarted || audioPlaybackPending) return;
-            audioPlaybackPending = true;
-            try {
-                await welcomeSound.play();
-                audioStarted = true;
-                playWelcomeSoundButton.classList.add('hidden');
-            } catch (error) {
-                playWelcomeSoundButton.classList.remove('hidden');
-                if (error.name !== 'NotAllowedError') {
-                    console.error('Unable to play the welcome sound:', error);
-                }
-            } finally {
-                audioPlaybackPending = false;
+        welcomeSound.play().catch(error => {
+            if (error?.name === 'NotAllowedError') {
+                console.warn('The browser blocked automatic welcome audio playback.');
+                return;
             }
-        };
-
-        playWelcomeSoundButton.addEventListener('click', () => {
-            playWelcomeSound();
+            console.error('Unable to play the welcome sound:', error);
         });
-
-        playWelcomeSound();
         updateCountdown();
         const countdownTimer = window.setInterval(updateCountdown, 250);
 

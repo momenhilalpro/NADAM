@@ -7370,7 +7370,7 @@
             analyzeCompareItems([...compareItems], ++compareAnalysisRequestId);
         }
 
-        function renderGeminiComparisonHtml(advice, items, bestProduct, isLoading = false) {
+        function renderGeminiComparisonHtml(advice, items, bestProduct, isLoading = false, isFallback = false) {
             const safeAdvice = escapeHtml(String(advice || ''))
                 .replace(/\*\*(.+?)\*\*/g, '<strong class="text-white">$1</strong>')
                 .replace(/`([^`]+)`/g, '<code class="rounded bg-slate-950 px-1.5 py-0.5 text-amber-300">$1</code>');
@@ -7430,7 +7430,7 @@
                             </div>
                         </div>
                         <span class="${isLoading ? 'animate-pulse' : ''} rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-[10px] font-black text-amber-300">
-                            ${isLoading ? 'جاري التحليل' : 'AI Ready'}
+                            ${isLoading ? 'جاري التحليل' : isFallback ? 'توصية بديلة' : 'تم التحليل'}
                         </span>
                     </div>
                 </div>
@@ -7532,16 +7532,20 @@
                 if (requestId !== compareAnalysisRequestId) return;
                 const recBox = document.getElementById('aiRecommendationBox');
                 if (recBox) {
-                    const fallbackMessage = [429, 500, 502, 503, 504].includes(error.status)
-                        ? "خدمة التحليل مزدحمة مؤقتاً. يمكنك الاعتماد على جدول المقارنة والاختيار الأولي أعلاه."
-                        : "تعذر تحليل المنتجات حالياً. يمكنك الاعتماد على جدول المقارنة والاختيار الأولي أعلاه.";
+                    const serviceUnconfigured = error?.status === 503 &&
+                        /غير مهيأة/.test(String(error.message || ''));
+                    const fallbackMessage = serviceUnconfigured
+                        ? "خدمة التحليل بالذكاء الاصطناعي غير مهيأة على الخادم. جدول المقارنة والتوصية الأولية متاحان."
+                        : [429, 500, 502, 503, 504].includes(error?.status)
+                            ? "خدمة التحليل مزدحمة مؤقتاً. يمكنك الاعتماد على جدول المقارنة والاختيار الأولي أعلاه."
+                            : "تعذر تحليل المنتجات حالياً. يمكنك الاعتماد على جدول المقارنة والاختيار الأولي أعلاه.";
                     const bestFallback = items.reduce((best, item) => {
                         const itemRatio = Number(item.score || 0) / Math.max(1, getEffectiveProductPrice(item));
                         const bestRatio = Number(best.score || 0) / Math.max(1, getEffectiveProductPrice(best));
                         return itemRatio > bestRatio ? item : best;
                     }, items[0]);
                     recBox.className = 'mb-4 overflow-hidden rounded-xl border border-slate-800 bg-slate-900 shadow-[0_0_28px_rgba(245,158,11,0.08)]';
-                    recBox.innerHTML = renderGeminiComparisonHtml(fallbackMessage, items, bestFallback, false);
+                    recBox.innerHTML = renderGeminiComparisonHtml(fallbackMessage, items, bestFallback, false, true);
                 }
             }
         }
@@ -8160,7 +8164,9 @@ async function sendChatMessage() {
     } catch (error) {
         const normalizedMessage = userMessage.toLowerCase();
         let reply = '';
-        if ([429, 500, 502, 503, 504].includes(error.status)) {
+        if (error?.status === 503 && /غير مهيأة/.test(String(error.message || ''))) {
+            reply = 'المساعد الذكي غير مهيأ حالياً على الخادم. يمكنك استخدام وضع الموظف الافتراضي للرد الفوري، أو تصفح المنتجات والأقسام.';
+        } else if ([429, 500, 502, 503, 504].includes(error?.status)) {
             reply = normalizedMessage.includes('شحن')
                 ? 'الخدمة الذكية مزدحمة حالياً. يمكنكم متابعة الطلب عبر صفحة تتبع الطلبات، وشحننا عادةً خلال 2–5 أيام عمل.'
                 : normalizedMessage.includes('إرجاع') || normalizedMessage.includes('استرجاع')

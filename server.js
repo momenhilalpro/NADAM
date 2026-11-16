@@ -30,6 +30,9 @@ if (!admin.apps.length) {
 const PRIMARY_ADMIN_EMAIL = 'momenhilal6942@gmail.com';
 const firestore = admin.firestore();
 const geminiApiKey = process.env.GEMINI_API_KEY?.trim() || '';
+if (!geminiApiKey) {
+    console.warn('[AI] GEMINI_API_KEY is not configured; Gemini services are disabled.');
+}
 const geminiRequestWindows = new Map();
 const GEMINI_REQUEST_LIMIT = 10;
 const GEMINI_REQUEST_WINDOW_MS = 60_000;
