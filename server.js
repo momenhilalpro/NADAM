@@ -286,6 +286,10 @@ app.delete('/api/admin/users/:uid', requireAdmin, async (request, response) => {
     }
 });
 
+app.use('/api', (_request, response) => {
+    response.status(404).json({ error: 'API endpoint not found.' });
+});
+
 app.use(express.static(path.join(__dirname, 'dist')));
 app.get('/{*path}', (_request, response) => {
     response.sendFile(path.join(__dirname, 'dist', 'index.html'));
@@ -295,4 +299,6 @@ const port = Number(process.env.PORT || 3000);
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
     app.listen(port, () => console.log(`Store server listening on port ${port}`));
 }
+
+export default app;
 

@@ -4546,7 +4546,9 @@
                         cache: 'no-store'
                     });
                     const result = await response.json().catch(() => null);
-                    if (!response.ok) throw new Error(result?.error || `HTTP ${response.status}`);
+                    if (!response.ok) {
+                        throw new Error(getApiErrorMessage(result, `HTTP ${response.status}`));
+                    }
                     const soldCount = Number(result?.soldCount);
                     if (!Number.isSafeInteger(soldCount) || soldCount < 0) {
                         throw new Error('استجابة عدد المبيعات غير صالحة.');
@@ -7994,7 +7996,7 @@ async function requestGeminiText(prompt) {
     const result = await response.json().catch(() => null);
     if (!response.ok) {
         const error = Object.assign(
-            new Error(result?.error || `AI request failed (${response.status})`),
+            new Error(getApiErrorMessage(result, `AI request failed (${response.status})`)),
             { status: response.status }
         );
         const retryAfterSeconds = Number(response.headers.get('Retry-After'));
@@ -8011,6 +8013,14 @@ async function requestGeminiText(prompt) {
     const text = typeof result?.text === 'string' ? result.text.trim() : '';
     if (!text) throw Object.assign(new Error('لم تُرجع خدمة Gemini نصاً صالحاً.'), { status: 502 });
     return text;
+}
+
+function getApiErrorMessage(result, fallback) {
+    const error = result?.error;
+    if (typeof result?.message === 'string' && result.message.trim()) return result.message.trim();
+    if (typeof error === 'string' && error.trim()) return error.trim();
+    if (error && typeof error.message === 'string' && error.message.trim()) return error.message.trim();
+    return fallback;
 }
 
 async function getAIProductRecommendations(cartItems, recentlyViewed) {
@@ -9225,7 +9235,9 @@ function escapeHtml(text) {
                 body: JSON.stringify({ rating, comment })
             });
             const result = await response.json().catch(() => null);
-            if (!response.ok) throw new Error(result?.error || 'تعذر حفظ المراجعة حالياً.');
+            if (!response.ok) {
+                throw new Error(getApiErrorMessage(result, 'تعذر حفظ المراجعة حالياً.'));
+            }
             return result;
         }
 
