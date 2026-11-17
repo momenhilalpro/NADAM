@@ -7530,17 +7530,23 @@
                     recBox.innerHTML = renderGeminiComparisonHtml(advice, items, bestFallback, false);
                 }
             } catch (error) {
-                console.error("Gemini Compare Error:", error);
+                if (error?.status === 429) console.warn('Gemini comparison quota/rate limit reached:', error.message);
+                else console.error('Gemini Compare Error:', error);
                 if (requestId !== compareAnalysisRequestId) return;
                 const recBox = document.getElementById('aiRecommendationBox');
                 if (recBox) {
                     const serviceUnconfigured = error?.status === 503 &&
                         /غير مهيأة/.test(String(error.message || ''));
-                    const fallbackMessage = serviceUnconfigured
-                        ? "خدمة التحليل بالذكاء الاصطناعي غير مهيأة على الخادم. جدول المقارنة والتوصية الأولية متاحان."
-                        : [429, 500, 502, 503, 504].includes(error?.status)
-                            ? "خدمة التحليل مزدحمة مؤقتاً. يمكنك الاعتماد على جدول المقارنة والاختيار الأولي أعلاه."
-                            : "تعذر تحليل المنتجات حالياً. يمكنك الاعتماد على جدول المقارنة والاختيار الأولي أعلاه.";
+                    let fallbackMessage = "تعذر تحليل المنتجات حالياً. يمكنك الاعتماد على جدول المقارنة والاختيار الأولي أعلاه.";
+                    if (serviceUnconfigured) {
+                        fallbackMessage = "خدمة التحليل بالذكاء الاصطناعي غير مهيأة على الخادم. جدول المقارنة والتوصية الأولية متاحان.";
+                    } else if (error?.code === 'GEMINI_QUOTA_EXCEEDED') {
+                        fallbackMessage = "بلغت خدمة Gemini حد الاستخدام الحالي. راجع الحصة والفوترة في إعدادات Google AI، وجدول المقارنة والتوصية الأولية متاحان.";
+                    } else if (error?.code === 'AI_RATE_LIMITED') {
+                        fallbackMessage = "تم إرسال طلبات ذكاء اصطناعي كثيرة خلال وقت قصير. انتظر قليلاً ثم أعد المحاولة؛ جدول المقارنة متاح.";
+                    } else if ([429, 500, 502, 503, 504].includes(error?.status)) {
+                        fallbackMessage = "خدمة التحليل مزدحمة مؤقتاً. يمكنك الاعتماد على جدول المقارنة والاختيار الأولي أعلاه.";
+                    }
                     const bestFallback = items.reduce((best, item) => {
                         const itemRatio = Number(item.score || 0) / Math.max(1, getEffectiveProductPrice(item));
                         const bestRatio = Number(best.score || 0) / Math.max(1, getEffectiveProductPrice(best));
@@ -7997,9 +8003,9 @@ async function requestGeminiText(prompt) {
     if (!response.ok) {
         const error = Object.assign(
             new Error(getApiErrorMessage(result, `AI request failed (${response.status})`)),
-            { status: response.status }
+            { status: response.status, code: result?.code }
         );
-        const retryAfterSeconds = Number(response.headers.get('Retry-After'));
+        const retryAfterSeconds = Number(result?.retryAfterSeconds || response.headers.get('Retry-After'));
         if (Number.isFinite(retryAfterSeconds) && retryAfterSeconds > 0) {
             error.retryAfterSeconds = retryAfterSeconds;
         }
@@ -8174,7 +8180,9 @@ async function sendChatMessage() {
     } catch (error) {
         const normalizedMessage = userMessage.toLowerCase();
         let reply = '';
-        if (error?.status === 503 && /غير مهيأة/.test(String(error.message || ''))) {
+        if (error?.status === 429) {
+            reply = `خدمة الذكاء الاصطناعي بلغت حد الطلبات المؤقت؛ سأحاول مساعدتك بإجابة أساسية. ${getSimulatedAgentReply(userMessage)}`;
+        } else if (error?.status === 503 && /غير مهيأة/.test(String(error.message || ''))) {
             reply = 'المساعد الذكي غير مهيأ حالياً على الخادم. يمكنك استخدام وضع الموظف الافتراضي للرد الفوري، أو تصفح المنتجات والأقسام.';
         } else if ([429, 500, 502, 503, 504].includes(error?.status)) {
             reply = normalizedMessage.includes('شحن')
@@ -8186,7 +8194,10 @@ async function sendChatMessage() {
             reply = 'تعذر إرسال الاستفسار حالياً. حاول مرة أخرى أو استخدم وضع الموظف الافتراضي.';
         }
         appendSupportChatMessage('assistant', reply, { mode: requestMode });
-        if (requestMode === 'ai') console.error('Gemini chat request failed:', error);
+        if (requestMode === 'ai') {
+            if (error?.status === 429) console.warn('Gemini chat quota/rate limit reached:', error.message);
+            else console.error('Gemini chat request failed:', error);
+        }
     } finally {
         loading.remove();
         sendButton.disabled = false;

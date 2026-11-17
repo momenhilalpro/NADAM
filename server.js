@@ -36,6 +36,31 @@ if (!geminiApiKey) {
 const geminiRequestWindows = new Map();
 const GEMINI_REQUEST_LIMIT = 10;
 const GEMINI_REQUEST_WINDOW_MS = 60_000;
+let geminiQuotaCooldownUntil = 0;
+
+function getGeminiRetryAfterSeconds(upstreamResponse, result) {
+    const retryAfterHeader = upstreamResponse.headers.get('retry-after');
+    const retryAfterSeconds = Number(retryAfterHeader);
+    if (Number.isFinite(retryAfterSeconds) && retryAfterSeconds > 0) {
+        return Math.ceil(retryAfterSeconds);
+    }
+
+    const retryAt = Date.parse(retryAfterHeader || '');
+    if (Number.isFinite(retryAt) && retryAt > Date.now()) {
+        return Math.ceil((retryAt - Date.now()) / 1000);
+    }
+
+    const retryInfo = result?.error?.details?.find(detail =>
+        String(detail['@type'] || '').endsWith('google.rpc.RetryInfo')
+    )?.retryDelay;
+    const retryDelaySeconds = Number.parseFloat(String(retryInfo || '').replace(/s$/, ''));
+    if (Number.isFinite(retryDelaySeconds) && retryDelaySeconds > 0) {
+        return Math.ceil(retryDelaySeconds);
+    }
+
+    const retryMessage = String(result?.error?.message || '').match(/retry in\s+(\d+(?:\.\d+)?)s/i);
+    return retryMessage ? Math.max(1, Math.ceil(Number(retryMessage[1]))) : 60;
+}
 
 function consumeGeminiRequest(ipAddress) {
     const now = Date.now();
@@ -65,10 +90,24 @@ app.post('/api/ai/generate', async (request, response) => {
         return response.status(503).json({ error: 'خدمة الاقتراحات الذكية غير مهيأة على الخادم.' });
     }
 
+    const quotaCooldownSeconds = Math.ceil((geminiQuotaCooldownUntil - Date.now()) / 1000);
+    if (quotaCooldownSeconds > 0) {
+        response.set('Retry-After', String(quotaCooldownSeconds));
+        return response.status(429).json({
+            error: 'بلغت خدمة Gemini حد الاستخدام المؤقت؛ أوقفنا الطلبات حتى موعد إعادة المحاولة.',
+            code: 'GEMINI_QUOTA_EXCEEDED',
+            retryAfterSeconds: quotaCooldownSeconds
+        });
+    }
+
     const retryAfterSeconds = consumeGeminiRequest(request.ip || request.socket.remoteAddress || 'unknown');
     if (retryAfterSeconds) {
         response.set('Retry-After', String(retryAfterSeconds));
-        return response.status(429).json({ error: 'تم تجاوز الحد المؤقت لطلبات المساعد الذكي.' });
+        return response.status(429).json({
+            error: 'تم تجاوز الحد المؤقت لطلبات المساعد الذكي.',
+            code: 'AI_RATE_LIMITED',
+            retryAfterSeconds
+        });
     }
 
     const controller = new AbortController();
@@ -88,9 +127,17 @@ app.post('/api/ai/generate', async (request, response) => {
         );
         const result = await upstreamResponse.json().catch(() => null);
         if (upstreamResponse.status === 429) {
-            const retryAfter = Number(upstreamResponse.headers.get('retry-after'));
-            if (Number.isFinite(retryAfter) && retryAfter > 0) response.set('Retry-After', String(retryAfter));
-            return response.status(429).json({ error: 'تم بلوغ حد استخدام Gemini؛ أعد المحاولة لاحقاً.' });
+            const retryAfter = getGeminiRetryAfterSeconds(upstreamResponse, result);
+            geminiQuotaCooldownUntil = Math.max(
+                geminiQuotaCooldownUntil,
+                Date.now() + retryAfter * 1000
+            );
+            response.set('Retry-After', String(retryAfter));
+            return response.status(429).json({
+                error: 'بلغت خدمة Gemini حد الاستخدام المؤقت؛ تحقق من الحصة المتاحة ثم أعد المحاولة.',
+                code: 'GEMINI_QUOTA_EXCEEDED',
+                retryAfterSeconds: retryAfter
+            });
         }
         if (!upstreamResponse.ok) {
             console.error(`Gemini request failed with status ${upstreamResponse.status}.`);
