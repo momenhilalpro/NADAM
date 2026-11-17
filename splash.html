@@ -98,19 +98,52 @@
             countdownElement.textContent = `جاري فتح بوابة المتجر خلال ${secondsRemaining.toLocaleString('ar-EG')} ثوانٍ...`;
         };
 
-        const playWelcomeSound = () => {
-            if (!welcomeSound.paused) return;
-            welcomeSound.play().catch(error => {
-                if (error?.name === 'NotAllowedError') {
-                    console.warn('The browser blocked automatic welcome audio playback.');
-                    return;
+        const welcomeSoundGestureEvents = ['pointerdown', 'touchstart', 'click', 'keydown'];
+        let welcomeSoundPlaybackPending = false;
+        let lastGesturePlaybackAt = 0;
+        const removeWelcomeSoundGestureListeners = () => {
+            welcomeSoundGestureEvents.forEach(eventName =>
+                document.removeEventListener(eventName, playWelcomeSound)
+            );
+        };
+        const playWelcomeSound = event => {
+            const isUserGesture = event?.isTrusted === true;
+            if (!welcomeSound.paused || (!isUserGesture && welcomeSoundPlaybackPending)) return;
+            if (isUserGesture) {
+                const now = Date.now();
+                if (now - lastGesturePlaybackAt < 250) return;
+                lastGesturePlaybackAt = now;
+            }
+
+            welcomeSoundPlaybackPending = true;
+            try {
+                const playback = welcomeSound.play();
+                if (playback && typeof playback.then === 'function') {
+                    playback.then(() => {
+                        welcomeSoundPlaybackPending = false;
+                        removeWelcomeSoundGestureListeners();
+                    }).catch(error => {
+                        welcomeSoundPlaybackPending = false;
+                        if (error?.name !== 'NotAllowedError') {
+                            console.error('Unable to play the welcome sound:', error);
+                        } else if (!isUserGesture) {
+                            console.warn('The browser blocked automatic welcome audio playback.');
+                        }
+                    });
+                } else {
+                    welcomeSoundPlaybackPending = false;
                 }
+            } catch (error) {
+                welcomeSoundPlaybackPending = false;
                 console.error('Unable to play the welcome sound:', error);
-            });
+            }
         };
 
+        welcomeSound.addEventListener('playing', removeWelcomeSoundGestureListeners, { once: true });
+        welcomeSoundGestureEvents.forEach(eventName =>
+            document.addEventListener(eventName, playWelcomeSound)
+        );
         playWelcomeSound();
-        document.addEventListener('pointerdown', playWelcomeSound, { once: true });
         updateCountdown();
         const countdownTimer = window.setInterval(updateCountdown, 250);
 
